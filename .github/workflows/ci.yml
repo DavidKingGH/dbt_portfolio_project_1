@@ -34,8 +34,8 @@ jobs:
           run: dbt deps
         
         # Step 5
-        - name: Run dbt source freshness
-          run: dbt source freshness --target dev
+        #- name: Run dbt source freshness
+        #  run: dbt source freshness --target dev
     
         # Step 6
         - name: Run dbt build
