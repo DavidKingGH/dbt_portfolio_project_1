@@ -29,14 +29,31 @@ jobs:
             python -m pip install --upgrade pip
             pip install dbt-duckdb
         
+                  - name: Configure dbt Profile
+        
         # Step 4
+        - name: Configure dbt Profile
+          run: |
+            mkdir -p ~/.dbt
+            cat <<EOF > ~/.dbt/profiles.yml
+            portfolio_project_1:
+              target: dev
+              outputs:
+                dev:
+                  type: duckdb
+                  path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
+                  schema: analytics_dev
+                  threads: 4
+            EOF
+
+        # Step 5
         - name: Install dbt packages
           run: dbt deps
         
-        # Step 5
+        # Step 6
         - name: Run dbt source freshness
           run: dbt source freshness --target dev
     
-        # Step 6
+        # Step 7
         - name: Run dbt build
           run: dbt build --target dev
