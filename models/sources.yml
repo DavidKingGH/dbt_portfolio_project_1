@@ -15,6 +15,12 @@ sources:
           # loaded_at_field: loaded_at
       - name: dim_users
         description: "Dimension table for customers."
+        columns:
+          - name: user_pseudo_id
+            description: Primary key of the dim_users table
+            data_tests:
+              - unique
+              - not_null
         config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
@@ -22,6 +28,12 @@ sources:
           # loaded_at_field: loaded_at
       - name: fact_event_items
         description: "Fact table containing all items from events."
+        columns:
+          - name: event_id
+            description: Primary key of the fact_events table
+            data_tests:
+              - unique
+              - not_null
         config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
@@ -29,6 +41,13 @@ sources:
           # loaded_at_field: loaded_at
       - name: fact_events
         description: "Fact table containing all events."
+        columns:
+          - name: event_id
+            description: Primary key of the fact_events table
+            data_tests:
+              - unique
+              - not_null
+        config: 
         config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
