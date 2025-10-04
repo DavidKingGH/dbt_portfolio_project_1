@@ -1,0 +1,42 @@
+name: dbt CI Workflow
+on:
+  push:
+    branches:
+      - dev
+      - 'feature/**'
+
+jobs:
+    dbt_ci_build:
+        runs-on: ubuntu-latest
+    
+        env:
+            MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        
+        steps:
+        # Step 1
+        - name: Check out repository code
+          uses: actions/checkout@v4
+        
+          # Step 2
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.11'
+        
+        # Step 3
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install dbt-duckdb
+        
+        # Step 4
+        - name: Install dbt packages
+          run: dbt deps
+        
+        # Step 5
+        - name: Run dbt source freshness
+          run: dbt source freshness --target dev
+    
+        # Step 6
+        - name: Run dbt build
+          run: dbt build --target dev
