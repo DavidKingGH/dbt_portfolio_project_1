@@ -13,4 +13,4 @@ from source
 )
 
 select *
-from renamed_and_casted;
+from renamed_and_casted

@@ -27,6 +27,7 @@ select
 	creative_name,
 	creative_slot,
 	loaded_at
+from source
 )
 
 select *
