@@ -48,6 +48,7 @@ models:
         - not_null
         - unique
         - relationships:
+          arguments:
             to: ref('stg__user_orders')
             field: user_id
     - name: dominant_device
