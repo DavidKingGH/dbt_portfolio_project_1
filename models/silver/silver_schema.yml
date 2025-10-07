@@ -6,7 +6,8 @@ models:
   description: Summarizes the revenue for each item within each purchase event.
   data_tests: 
     - dbt_utils.expression_is_true:
-        expression: "total_items >= distinct_products"  
+        arguments:
+          expression: "total_items >= distinct_products"  
   columns: 
     - name: event_id
       data_tests:
@@ -33,22 +34,26 @@ models:
     - name: revenue
       data_tests:
         - dbt_utils.expression_is_true:
-            expression: ">=0"
+            arguments:
+              expression: ">=0"
     - name: total_items
       data_tests:
         - dbt_utils.expression_is_true:
-            expression: ">= 1" # An order should have at least one item
+            arguments:
+              expression: ">= 1" # An order should have at least one item
     - name: distinct_products
       data_tests:
         - dbt_utils.expression_is_true:
-            expression: ">=0" # An order should have at least one distinct item
+            arguments:
+              expression: ">=0" # An order should have at least one distinct item
 - name: stg__user_sessions
   description: Summarizes the session information for each session for each user.
   data_tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns: ['user_id', 'ga_session_id']
     - dbt_utils.expression_is_true:
-        expression: "session_end_timestamp >= session_start_timestamp"
+        arguments:
+          expression: "session_end_timestamp >= session_start_timestamp"
   columns:
     - name: user_id
       data_tests:
@@ -87,4 +92,5 @@ models:
     - name: event_count
       data_tests:
         - dbt_utils.expression_is_true: 
-            expression: ">0"
+            arguments:
+              expression: ">0"

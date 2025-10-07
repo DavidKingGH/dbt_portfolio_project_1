@@ -8,7 +8,8 @@ models:
     and purchaser counts for each cohort over time."
   data_tests:
       - dbt_utils.expression_is_true:
-          expression: "orders >= purchasers"
+          arguments:
+            expression: "orders >= purchasers"
   columns: 
     - name: acquisition_device
       data_tests: 
@@ -21,23 +22,27 @@ models:
     - name: months_since_acquisition
       data_tests: 
         - not_null
-        - dbt_utils.expression_is_true: 
-            expression: ">=0"
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"
     - name: total_revenue
       data_tests:
         - not_null 
-        - dbt_utils.expression_is_true: 
-            expression: ">=0"  
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
     - name: orders
       data_tests:
         - not_null 
-        - dbt_utils.expression_is_true: 
-            expression: ">=0"  
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
     - name: purchasers
       data_tests:
         - not_null 
-        - dbt_utils.expression_is_true: 
-            expression: ">=0"  
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
 - name: mrt_user_device_segments
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
@@ -61,7 +66,8 @@ models:
       data_tests:
         - not_null
         - dbt_utils.expression_is_true:
-            expression: ">=0"
+            arguments:
+              expression: ">=0"
     - name: cart_value_quartile
       data_tests:
         - not_null
