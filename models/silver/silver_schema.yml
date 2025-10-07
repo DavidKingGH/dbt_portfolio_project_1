@@ -1,0 +1,8 @@
+version: 2
+
+models:
+
+- name: stg__user_orders
+  description: Summarizes the revenue for each item within each purchase event.
+- name: stg__user_sessions
+  desciption: Summarizes the session information for each session for each user.
