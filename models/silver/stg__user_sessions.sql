@@ -31,4 +31,4 @@ select
     count(*) as event_count
 
 from ranked_events
-group by user_pseudo_id, ga_session_id
+group by user_id, ga_session_id
