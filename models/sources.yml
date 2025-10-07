@@ -3,8 +3,7 @@ version: 2
 sources:
   - name: bronze
     description: "Source data from the GA4 ecommerce database in MotherDuck."
-    # schema: ga4_raw 
-    schema: main
+    schema: "{% if target.name == 'ci' %}ga4_raw{% else %}main{% endif %}"
     tables:
       - name: dim_items
         description: "Dimension table for items in inventory."
@@ -26,7 +25,7 @@ sources:
             description: Primary key of the dim_users table
             data_tests:
               - unique
-              - not_null
+              - not_null 
         #config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}

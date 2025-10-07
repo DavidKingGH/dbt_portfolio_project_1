@@ -1,0 +1,80 @@
+version: 2
+
+models:
+
+- name: mrt_acquisition_device_cohorts
+  description: |
+    "Calculates monthly user acquisition cohorts based on the device of their first session. It tracks monthly revenue, orders, 
+    and purchaser counts for each cohort over time."
+  data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "orders >= purchasers"
+  columns: 
+    - name: acquisition_device
+      data_tests: 
+        - accepted_values: 
+            arguments: 
+              values: ['mobile', 'tablet', 'desktop']
+    - name: acquisition_month
+      data_tests: 
+        - not_null
+    - name: months_since_acquisition
+      data_tests: 
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"
+    - name: total_revenue
+      data_tests:
+        - not_null 
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
+    - name: orders
+      data_tests:
+        - not_null 
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
+    - name: purchasers
+      data_tests:
+        - not_null 
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">=0"  
+- name: mrt_user_device_segments
+  description: |
+    "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
+    to other users on the same device type."
+  columns: 
+    - name: user_id
+      data_tests: 
+        - not_null
+        - unique
+        - relationships:
+            arguments:
+              to: ref('stg__user_orders')
+              field: user_id
+    - name: dominant_device
+      data_tests: 
+        - not_null
+        - accepted_values: 
+            arguments: 
+              values: ['mobile', 'tablet', 'desktop']
+    - name: total_revenue
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+    - name: cart_value_quartile
+      data_tests:
+        - not_null
+        - accepted_values: 
+            arguments: 
+              values: [1,2,3,4]
+    - name: segment_name
+      data_tests:
+        - not_null
+   
