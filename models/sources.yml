@@ -20,7 +20,7 @@ sources:
             description: Primary key of the dim_users table
             data_tests:
               - unique
-              - not_null
+              - not_null 
         #config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
