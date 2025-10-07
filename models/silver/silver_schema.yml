@@ -36,11 +36,11 @@ models:
     - name: total_items
       data_tests:
         - dbt_utils.expression_is_true:
-            expression: ">= 1" # An order should have at least one item
+            expression:  ">= 1" # An order should have at least one item
     - name: distinct_products
       data_tests:
         - dbt_utils.expression_is_true:
-            expression: ">=0" # An order should have at least one distinct item
+            expression:  ">=0" # An order should have at least one distinct item
 - name: stg__user_sessions
   description: Summarizes the session information for each session for each user.
   data_tests:
@@ -86,3 +86,34 @@ models:
       data_tests:
         - dbt_utils.expression_is_true: 
             expression: ">0"
+- name: stg__conversion_events
+  description: |
+   A table of all purchase events, with aggregated revenue and item counts.
+   Grain: One row per event_id (purchase_id) 
+  columns:
+    - name: purchase_id
+      data_tests:
+        - not_null
+        - unique
+        - relationships: 
+            to: ref('fct_events')
+            field: event_id
+    - name: user_id
+      data_tests:
+        - not_null
+    - name: ga_session_id
+      data_tests: 
+        - not_null
+    - name: purchase_timestamp
+      data_tests: 
+        - not_null
+    - name: purchase_revenue
+      data_tests: 
+        - not_null
+        - dbt_utils.expression_is_true:
+            expression:  ">=0"
+    - name: distinct_item_count
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            expression: ">=0" 
