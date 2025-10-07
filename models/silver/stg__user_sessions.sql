@@ -21,7 +21,6 @@ select
     MAX(CASE WHEN session_event_rank = 1 THEN source          END) AS session_source,
     MAX(CASE WHEN session_event_rank = 1 THEN medium          END) AS session_medium,
     MAX(CASE WHEN session_event_rank = 1 THEN campaign_name   END) AS session_campaign,
-    MAX(CASE WHEN session_event_rank = 1 THEN gclid           END) AS session_gclid,
     MAX(CASE WHEN session_event_rank = 1 THEN page_location   END) AS landing_page,
 
     -- Session-level info 
