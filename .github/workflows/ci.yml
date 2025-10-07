@@ -35,21 +35,21 @@ jobs:
       # Step 4: Configure dbt Profile
       - name: Configure dbt Profile
         run: |
-          mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
-          portfolio_project_1:
-            target: dev
-          outputs:
-            dev:
-              type: duckdb
-              path: "C:/Users/David/Downloads/Coding_Projects/dbt/portfolio/.db/dev.duckdb"
-              schema: main
-              threads: 4
-            ci:
-              type: duckdb
-              path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
-              schema: analytics_dev
-              threads: 4
+            mkdir -p ~/.dbt
+            cat <<EOF > ~/.dbt/profiles.yml
+            portfolio_project_1:
+              target: dev
+              outputs:
+                dev:
+                  type: duckdb
+                  path: "C:/Users/David/Downloads/Coding_Projects/dbt/portfolio/.db/dev.duckdb"
+                  schema: main
+                  threads: 4
+                ci:
+                  type: duckdb
+                  path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
+                  schema: analytics_dev
+                  threads: 4
             EOF
           
       # Step 5: Install dbt packages
