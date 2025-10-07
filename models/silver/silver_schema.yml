@@ -50,7 +50,8 @@ models:
   description: Summarizes the session information for each session for each user.
   data_tests:
     - dbt_utils.unique_combination_of_columns:
-        combination_of_columns: ['user_id', 'ga_session_id']
+        arguments:
+          combination_of_columns: ['user_id', 'ga_session_id']
     - dbt_utils.expression_is_true:
         arguments:
           expression: "session_end_timestamp >= session_start_timestamp"
