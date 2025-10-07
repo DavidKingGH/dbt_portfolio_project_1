@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: ga4_ecommerce_data
+  - name: bronze
     description: "Source data from the GA4 ecommerce database in MotherDuck."
     # schema: ga4_raw 
     schema: main

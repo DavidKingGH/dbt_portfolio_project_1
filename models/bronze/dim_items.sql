@@ -1,7 +1,6 @@
 with source as (
 SELECT *
--- FROM {{ source('ga4_ecommerce_data', 'dim_items')}}
-FROM {{ get_parquet_path('ga4_ecommerce_data', 'dim_items')}}
+FROM {{ source('bronze', 'dim_items') }}
 
 ),
 
