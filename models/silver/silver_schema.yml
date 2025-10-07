@@ -55,8 +55,8 @@ models:
         - not_null
         - relationships: 
             arguments:
-            to: ref('fct_events')
-            field: user_id
+              to: ref('fct_events')
+              field: user_id
     - name: ga_session_id
       data_tests: 
         - not_null
