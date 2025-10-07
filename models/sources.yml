@@ -1,13 +1,15 @@
 version: 2
 
 sources:
-  - name: ga4_ecommerce_data
+  - name: bronze
     description: "Source data from the GA4 ecommerce database in MotherDuck."
-    schema: ga4_raw 
-
+    schema: "{% if target.name == 'ci' %}ga4_raw{% else %}main{% endif %}"
     tables:
       - name: dim_items
         description: "Dimension table for items in inventory."
+        external:
+          location: 'C:/Users/David/my_dbt_project/ga4_data/dim/dim_items/*.parquet' 
+          format: parquet 
         #config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
@@ -15,12 +17,15 @@ sources:
           # loaded_at_field: loaded_at
       - name: dim_users
         description: "Dimension table for customers."
+        external:
+          location: 'C:/Users/David/my_dbt_project/ga4_data/dim/dim_users/*.parquet' 
+          format: parquet 
         columns:
           - name: user_pseudo_id
             description: Primary key of the dim_users table
             data_tests:
               - unique
-              - not_null
+              - not_null 
         #config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
@@ -28,6 +33,9 @@ sources:
           # loaded_at_field: loaded_at
       - name: fact_event_items
         description: "Fact table containing all items from events."
+        external:
+          location: 'C:/Users/David/my_dbt_project/ga4_data/fct/fct_event_items/*.parquet' 
+          format: parquet 
         #config: 
           #freshness: 
           #  warn_after: {count: 12, period: hour}
@@ -35,6 +43,9 @@ sources:
           # loaded_at_field: loaded_at
       - name: fact_events
         description: "Fact table containing all events."
+        external:
+          location: 'C:/Users/David/my_dbt_project/ga4_data/fct/fact_events/*.parquet' 
+          format: parquet 
         columns:
           - name: event_id
             description: Primary key of the fact_events table

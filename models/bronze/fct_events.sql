@@ -1,6 +1,7 @@
 with source as (
 SELECT *
-FROM {{ source('ga4_ecommerce_data', 'fact_events')}}
+FROM {{ source('bronze', 'fact_events') }}
+
 ),
 
 renamed_and_casted as (
