@@ -17,13 +17,13 @@ models:
               field: event_id
     - name: order_date
       data_tests: 
-        - not null
+        - not_null
     - name: user_id
       data_tests:
         - not_null
     - name: ga_session_id
       data_tests:
-        - not null
+        - not_null
     - name: device_category
       data_tests:
         - accepted_values:
@@ -46,7 +46,7 @@ models:
   data_tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns: ['user_id', 'ga_session_id']
-    - dbt.expression_is_true:
+    - dbt_utils.expression_is_true:
         expression: "session_end_timestamp >= session_start_timestamp"
   columns:
     - name: user_id
