@@ -49,9 +49,9 @@ jobs:
           
       # Step 5: Install dbt packages
       - name: Install dbt packages
-        run: dbt deps
+        run: dbt deps --target ci
 
       # Step 6: Run dbt build
       # This command will now succeed because the dbt_utils macros are available
       - name: Run dbt build
-        run: dbt build
+        run: dbt build --target ci
