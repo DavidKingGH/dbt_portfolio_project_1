@@ -70,4 +70,36 @@ models:
     - name: segment_name
       data_tests:
         - not_null
-   
+- name: mrt_campaign_performance_rev_metrics
+  description: |
+    "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
+    to other users on the same device type."
+  columns: 
+    - name: user_id
+      data_tests: 
+        - not_null
+        - unique
+        - relationships:
+            to: ref('stg__user_orders')
+            field: user_id
+    - name: dominant_device
+      data_tests: 
+        - not_null
+        - accepted_values: 
+            arguments: 
+              values: ['mobile', 'tablet', 'desktop']
+    - name: total_revenue
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            expression: ">=0"
+    - name: cart_value_quartile
+      data_tests:
+        - not_null
+        - accepted_values: 
+            arguments: 
+              values: [1,2,3,4]
+    - name: segment_name
+      data_tests:
+        - not_null
+      
