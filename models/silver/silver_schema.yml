@@ -32,29 +32,29 @@ models:
     - name: revenue
       data_tests:
         - dbt_utils.expression_is_true:
-          expression: ">=0"
+            expression: ">=0"
     - name: total_items
       data_tests:
         - dbt_utils.expression_is_true:
-          expression: ">= 1" # An order should have at least one item
+            expression: ">= 1" # An order should have at least one item
     - name: distinct_products
       data_tests:
         - dbt_utils.expression_is_true:
-          expression: ">=0" # An order should have at least one distinct item
+            expression: ">=0" # An order should have at least one distinct item
 - name: stg__user_sessions
   description: Summarizes the session information for each session for each user.
   data_tests:
     - dbt_utils.unique_combination_of_columns:
-      combination_of_columns: ['user_id', 'ga_session_id']
+        combination_of_columns: ['user_id', 'ga_session_id']
     - dbt.expression_is_true:
-      - expression: "session_end_timestamp >= session_start_timestamp"
+        expression: "session_end_timestamp >= session_start_timestamp"
   columns:
     - name: user_id
       data_tests:
         - not_null
         - relationships: 
-          to: ref('fct_events')
-          field: user_id
+            to: ref('fct_events')
+            field: user_id
     - name: ga_session_id
       data_tests: 
         - not_null
@@ -85,4 +85,4 @@ models:
     - name: event_count
       data_tests:
         - dbt_utils.expression_is_true: 
-          expression: ">0"
+            expression: ">0"
