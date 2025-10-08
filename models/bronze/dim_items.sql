@@ -11,9 +11,8 @@ with source as (
 renamed_and_casted as (
 SELECT
 
-    cast(item_id as integer) as item_id,
-	
-    item_name,
+    item_id,
+	item_name,
 	item_brand,
 	item_variant,
 	item_category,

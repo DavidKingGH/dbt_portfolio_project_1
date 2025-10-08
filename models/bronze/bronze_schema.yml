@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_items
+    description: "Staging model for items dimension"
+    columns:
+      - name: item_id
+        tests:
+          - not_null
+
+  - name: dim_users
+    description: "Staging model for users dimension"
+    columns:
+      - name: user_id
+        description: Primary key of the dim_users table
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_events
+    description: "Staging model for events fact table"
+    columns:
+      - name: event_id
+        description: Primary key of the fact_events table
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_event_items
+    description: "Staging model for event items fact table"
+    columns:
+      - name: event_id
+        description: Primary key of the fact_events table
+        tests:
+          - unique
+          - not_null
