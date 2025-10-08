@@ -9,9 +9,6 @@ jobs:
   dbt_ci_build:
     runs-on: ubuntu-latest
 
-    env:
-      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
-
     steps:
       # Step 1: Check out your repository code
       # This will now include your packages.yml file
@@ -41,21 +38,14 @@ jobs:
               outputs:
                 dev:
                   type: duckdb
-                  path: "C:/Users/David/Downloads/Coding_Projects/dbt/portfolio/.db/dev.duckdb"
-                  schema: main
-                  threads: 4
-                ci:
-                  type: duckdb
-                  path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
-                  schema: analytics_dev
-                  threads: 4
+                  path: "dbt_warehouse.duckdb"
             EOF
           
       # Step 5: Install dbt packages
       - name: Install dbt packages
-        run: dbt deps --target ci
+        run: dbt deps
 
       # Step 6: Run dbt build
       # This command will now succeed because the dbt_utils macros are available
       - name: Run dbt build
-        run: dbt build --target ci
+        run: dbt build

@@ -1,6 +1,10 @@
 with source as (
-SELECT *
-FROM {{ source('bronze', 'fact_event_items') }}
+
+{% if target.name == 'prod' %}
+    select * from {{ source('bronze', 'fact_event_items') }}
+{% else %}
+    select * from read_parquet('ga4_data/fct/fact_event_items/*.parquet')
+{% endif %}
 
 ),
 
@@ -26,8 +30,7 @@ select
 	promotion_id,
 	promotion_name,
 	creative_name,
-	creative_slot,
-	loaded_at
+	creative_slot
 from source
 )
 
