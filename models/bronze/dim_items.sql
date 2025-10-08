@@ -21,9 +21,9 @@ SELECT
 	item_category3,
 	item_category4,
 	item_category5
-	
+
 FROM source
 )
 
 select *
-from renamed_and_casted
+from renamed_and_casted 
