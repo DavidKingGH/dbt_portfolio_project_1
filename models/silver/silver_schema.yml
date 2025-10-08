@@ -95,3 +95,39 @@ models:
         - dbt_utils.expression_is_true: 
             arguments:
               expression: ">0"
+- name: int__acquisition_touchpoints
+  description: First non-direct touchpoint for each user.
+  columns:
+    - name: user_id
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              field: user_id
+              to: ref('stg__user_sessions')
+    - name: session_source
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: session_medium
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+- name: int__customer_revenue
+  description: '...'
+  columns:
+    - name: user_id
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              field: user_id
+              to: ref('stg__conversion_events')
+    - name: total_revenue
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">0"

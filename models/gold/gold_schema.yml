@@ -124,3 +124,44 @@ models:
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
+- name: mrt_first_touch_ltv
+  description: "..."
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: avg_ltv_calculation_correct
+        arguments:
+          expression: "ABS(average_ltv_by_channel - (total_purchase_value_from_cohort / NULLIF(acquired_customers, 0))) < 0.01"
+          config:
+              severity: warn
+    - dbt_utils.expression_is_true:
+        name: customers_imply_revenue
+        expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
+        config:
+          severity: warn
+  columns:
+    - name: session_source
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: session_medium
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: acquired_customers
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: "> 0"
+    - name: total_purchase_value_from_cohort
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+    - name: average_ltv_by_channel
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
