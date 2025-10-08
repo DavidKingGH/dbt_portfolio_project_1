@@ -39,7 +39,7 @@ jobs:
               outputs:
                 dev:
                   type: duckdb
-                  path: "ga4_db.duckdb"
+                  path: "dbt_warehouse.duckdb"
             EOF
           
       # Step 5: Install dbt packages
