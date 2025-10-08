@@ -5,54 +5,55 @@ sources:
     description: "Source data for GA4. Reads from local Parquet in dev/CI, and from the 'ga4_raw' schema in prod."
     schema: "{{ 'ga4_raw' if target.name == 'prod' else none }}"
     
-    tables: {{ [
-      {
-        "name": "dim_items",
-        "external": {
-          "location": "ga4_data/dim/dim_items/*.parquet",
-          "format": "parquet"
-        }
-      } if target.name != 'prod' else {
-        "name": "dim_items",
-        "description": "Dimension table for items in inventory."
-      },
-      {
-        "name": "dim_users",
-        "external": {
-          "location": "ga4_data/dim/dim_users/*.parquet",
-          "format": "parquet"
-        },
-        "columns": [
-          {
-            "name": "user_pseudo_id",
-            "tests": ["unique", "not_null"]
-          }
-        ]
-      } if target.name != 'prod' else {
-        "name": "dim_users",
-        "description": "Dimension table for customers.",
-        "columns": [
-          {
-            "name": "user_pseudo_id",
-            "description": "Primary key of the dim_users table",
-            "tests": ["unique", "not_null"]
-          }
-        ]
-      }
-    ] if target.name != 'prod' else [
-      {
-        "name": "dim_items",
-        "description": "Dimension table for items in inventory."
-      },
-      {
-        "name": "dim_users", 
-        "description": "Dimension table for customers.",
-        "columns": [
-          {
-            "name": "user_pseudo_id",
-            "description": "Primary key of the dim_users table",
-            "tests": ["unique", "not_null"]
-          }
-        ]
-      }
-    ] }}
+    tables:
+      {% if target.name != 'prod' %}
+      # --- DEFINITION FOR DEV and CI TARGETS ---
+      - name: dim_items
+        external:
+          location: 'ga4_data/dim/dim_items/*.parquet'
+          format: parquet    
+      - name: dim_users
+        external:
+          location: 'ga4_data/dim/dim_users/*.parquet'
+          format: parquet 
+        columns:
+          - name: user_pseudo_id
+            tests:
+              - unique
+              - not_null 
+      - name: fact_event_items
+        external:
+          location: 'ga4_data/fct/fct_event_items/*.parquet'
+          format: parquet 
+      - name: fact_events
+        external:
+          location: 'ga4_data/fct/fact_events/*.parquet'
+          format: parquet 
+        columns:
+          - name: event_id
+            tests:
+              - unique
+              - not_null
+      {% else %}
+      # --- DEFINITION FOR PROD TARGET ---
+      - name: dim_items
+        description: "Dimension table for items in inventory."
+      - name: dim_users
+        description: "Dimension table for customers."
+        columns:
+          - name: user_pseudo_id
+            description: Primary key of the dim_users table
+            tests:
+              - unique
+              - not_null 
+      - name: fact_event_items
+        description: "Fact table containing all items from events."
+      - name: fact_events
+        description: "Fact table containing all events."
+        columns:
+          - name: event_id
+            description: Primary key of the fact_events table
+            tests:
+              - unique
+              - not_null
+      {% endif %}
