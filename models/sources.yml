@@ -3,15 +3,12 @@ version: 2
 sources:
   - name: bronze
     description: "Source data for GA4. Reads from local Parquet in dev/CI, and from the 'ga4_raw' schema in prod."
-    
-    # This Jinja correctly sets the schema for the 'prod' target and removes it for others.
     schema: "{{ 'ga4_raw' if target.name == 'prod' else none }}"
     
-    # This top-level 'if' block provides two completely separate definitions for the tables list.
-    # This is the most robust way to handle this conditional logic in YAML.
     tables:
-      {% if target.name != 'prod' %}
+{% if target.name != 'prod' %}
       # --- DEFINITION FOR DEV and CI TARGETS ---
+      # Note the indentation level of these list items.
       - name: dim_items
         external:
           location: 'ga4_data/dim/dim_items/*.parquet' 
@@ -38,8 +35,9 @@ sources:
             tests:
               - unique
               - not_null
-      {% else %}
+{% else %}
       # --- DEFINITION FOR PROD TARGET ---
+      # Note the indentation level of these list items.
       - name: dim_items
         description: "Dimension table for items in inventory."
       - name: dim_users
@@ -60,4 +58,4 @@ sources:
             tests:
               - unique
               - not_null
-      {% endif %}
+{% endif %}
