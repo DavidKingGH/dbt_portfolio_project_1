@@ -2,9 +2,10 @@ WITH sessions_with_revenue AS (
     SELECT
         s.ga_session_id,
         s.user_id,
-        s.session_source,
-        s.session_medium,
-        c.purchase_revenue -- This will be NULL if the session had no purchase
+        -- Handle missing/placeholder values
+        COALESCE(NULLIF(TRIM(s.session_source), ''), '(not set)') AS session_source,
+        COALESCE(NULLIF(TRIM(s.session_medium), ''), '(not set)') AS session_medium,
+        c.purchase_revenue
     FROM
         {{ ref('stg__user_sessions') }} AS s
     LEFT JOIN
@@ -16,11 +17,16 @@ WITH sessions_with_revenue AS (
 SELECT
     session_source,
     session_medium,
-    SUM(purchase_revenue) AS total_revenue,
+    COALESCE(SUM(purchase_revenue), 0) AS total_revenue,
     COUNT(DISTINCT user_id) AS total_users,
     COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN user_id END) AS converting_users,
-    total_revenue / NULLIF(COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN ga_session_id END), 0) AS average_order_value
+    CASE 
+        WHEN COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN ga_session_id END) > 0 
+        THEN SUM(purchase_revenue) / COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN ga_session_id END)
+        ELSE 0 
+    END AS average_order_value
 FROM
     sessions_with_revenue
 GROUP BY
-    1, 2
+    session_source,
+    session_medium

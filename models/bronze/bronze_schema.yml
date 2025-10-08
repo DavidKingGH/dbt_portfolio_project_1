@@ -17,7 +17,7 @@ models:
           - unique
           - not_null
 
-  - name: fact_events
+  - name: fct_events
     description: "Staging model for events fact table"
     columns:
       - name: event_id
@@ -26,7 +26,7 @@ models:
           - unique
           - not_null
 
-  - name: fact_event_items
+  - name: fct_event_items
     description: "Staging model for event items fact table"
     columns:
       - name: event_id

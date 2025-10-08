@@ -81,5 +81,46 @@ models:
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."
-
-      
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: revenue_matches_conversions
+        arguments:
+          expression: "(converting_users = 0 AND total_revenue = 0) OR (converting_users > 0 AND total_revenue >0)"
+          config:
+              severity: warn
+  columns:
+    - name: session_source
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: session_medium
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: total_revenue
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+    - name: total_users
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+    - name: converting_users
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: "<= total_users"
+    - name: average_order_value
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
