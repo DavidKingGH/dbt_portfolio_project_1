@@ -2,42 +2,30 @@ version: 2
 
 sources:
   - name: bronze
-    description: "Source data for GA4. Reads from local Parquet in dev/CI, and from the 'ga4_raw' schema in prod."
+    description: "Source data for GA4"
     schema: "{{ 'ga4_raw' if target.name == 'prod' else none }}"
     
     tables:
       - name: dim_items
         description: "Dimension table for items in inventory."
-        {{ "external:" if target.name != 'prod' else "" }}
-          {{ "location: 'ga4_data/dim/dim_items/*.parquet'" if target.name != 'prod' else "" }}
-          {{ "format: parquet" if target.name != 'prod' else "" }}
       
       - name: dim_users
         description: "Dimension table for customers."
-        {{ "external:" if target.name != 'prod' else "" }}
-          {{ "location: 'ga4_data/dim/dim_users/*.parquet'" if target.name != 'prod' else "" }}
-          {{ "format: parquet" if target.name != 'prod' else "" }}
         columns:
           - name: user_pseudo_id
-            description: "{{ 'Primary key of the dim_users table' if target.name == 'prod' else '' }}"
+            description: Primary key of the dim_users table
             tests:
               - unique
               - not_null 
       
       - name: fact_event_items
         description: "Fact table containing all items from events."
-        {{ "external:" if target.name != 'prod' else "" }}
-          {{ "location: 'ga4_data/fct/fct_event_items/*.parquet'" if target.name != 'prod' else "" }}
-          {{ "format: parquet" if target.name != 'prod' else "" }}
       
       - name: fact_events
         description: "Fact table containing all events."
-        {{ "external:" if target.name != 'prod' else "" }}
-          {{ "location: 'ga4_data/fct/fact_events/*.parquet'" if target.name != 'prod' else "" }}
-          {{ "format: parquet" if target.name != 'prod' else "" }}
         columns:
           - name: event_id
-            description: "{{ 'Primary key of the fact_events table' if target.name == 'prod' else '' }}"
+            description: Primary key of the fact_events table
             tests:
               - unique
               - not_null

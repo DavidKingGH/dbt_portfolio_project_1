@@ -1,6 +1,10 @@
 with source as (
-SELECT *
-FROM {{ source('bronze', 'fact_events') }}
+
+{% if target.name == 'prod' %}
+    select * from {{ source('bronze', 'fact_events') }}
+{% else %}
+    select * from read_parquet('ga4_data/fct/fact_events/*.parquet')
+{% endif %}
 
 ),
 
@@ -33,8 +37,7 @@ select
 	device_category,
 	operating_system,
 	browser,
-	mobile_brand_name,
-	loaded_at
+	mobile_brand_name
 from source
 )
 

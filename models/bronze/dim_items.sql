@@ -1,13 +1,16 @@
 with source as (
-SELECT *
-FROM {{ source('bronze', 'dim_items') }}
+
+{% if target.name == 'prod' %}
+    select * from {{ source('bronze', 'dim_items') }}
+{% else %}
+    select * from read_parquet('ga4_data/dim/dim_items/*.parquet')
+{% endif %}
 
 ),
 
 renamed_and_casted as (
 SELECT
 
-    cast(loaded_at as timestamp) as loaded_at,
     cast(item_id as integer) as item_id,
 	
     item_name,
@@ -18,7 +21,7 @@ SELECT
 	item_category3,
 	item_category4,
 	item_category5
-
+	
 FROM source
 )
 
