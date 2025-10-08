@@ -4,11 +4,12 @@ sources:
   - name: bronze
     description: "Source data for GA4. Reads from local Parquet in dev/CI, and from the 'ga4_raw' schema in prod."
     schema: "{{ 'ga4_raw' if target.name == 'prod' else none }}"
-    
-    tables:
+
+# This is the new, robust structure. The Jinja logic is at the same level as 'name' and 'description'.
+# It tells dbt to generate one of two different 'tables' blocks.
 {% if target.name != 'prod' %}
+    tables:
       # --- DEFINITION FOR DEV and CI TARGETS ---
-      # Note the indentation level of these list items.
       - name: dim_items
         external:
           location: 'ga4_data/dim/dim_items/*.parquet' 
@@ -36,8 +37,8 @@ sources:
               - unique
               - not_null
 {% else %}
+    tables:
       # --- DEFINITION FOR PROD TARGET ---
-      # Note the indentation level of these list items.
       - name: dim_items
         description: "Dimension table for items in inventory."
       - name: dim_users
