@@ -3,7 +3,6 @@ version: 2
 sources:
   - name: bronze
     description: "Source data from the GA4 ecommerce database in MotherDuck."
-    schema: main
     tables:
       - name: dim_items
         description: "Dimension table for items in inventory."
