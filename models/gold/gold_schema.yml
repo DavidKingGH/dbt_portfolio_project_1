@@ -165,3 +165,49 @@ models:
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
+- name: mrt__conversion_funnel
+  description:  Aggregate conversion funnel showing session drop-off at each purchase step
+  
+  config:
+    contract:
+      enforced: true
+  
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: funnel_logic_valid
+        expression: |
+          sessions_with_view_item >= sessions_with_add_to_cart
+          AND sessions_with_add_to_cart >= sessions_with_begin_checkout
+          AND sessions_with_begin_checkout >= sessions_with_add_shipping
+          AND sessions_with_add_shipping >= sessions_with_add_payment
+          AND sessions_with_add_payment >= sessions_with_purchase
+          AND sessions_with_purchase >= 0
+    - dbt_utils.expression_is_true:
+        name: has_data
+        expression: "sessions_with_view_item > 0"
+  
+  columns:
+    - name: sessions_with_view_item
+      data_type: integer
+      constraints:
+        - type: not_null
+    - name: sessions_with_add_to_cart
+      data_type: integer
+      constraints:
+        - type: not_null
+    - name: sessions_with_begin_checkout
+      data_type: integer
+      constraints:
+        - type: not_null
+    - name: sessions_with_add_shipping
+      data_type: integer
+      constraints:
+        - type: not_null
+    - name: sessions_with_add_payment
+      data_type: integer
+      constraints:
+        - type: not_null
+    - name: sessions_with_purchase
+      data_type: integer
+      constraints:
+        - type: not_null

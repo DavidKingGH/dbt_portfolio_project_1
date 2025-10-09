@@ -1,3 +1,4 @@
+with funnel_steps as (
 select
 
     user_id, 
@@ -20,3 +21,14 @@ where event_name IN (
     )
 
 group by 1,2
+)
+
+SELECT
+    -- Count the number of SESSIONS that included each step
+    SUM(did_view_item) AS sessions_with_view_item,
+    SUM(did_add_to_cart) AS sessions_with_add_to_cart,
+    SUM(did_begin_checkout) AS sessions_with_begin_checkout,
+    SUM(did_add_shipping_info) AS sessions_with_add_shipping,
+    SUM(did_add_payment_info) AS sessions_with_add_payment,
+    SUM(did_purchase) AS sessions_with_purchase
+FROM funnel_steps
