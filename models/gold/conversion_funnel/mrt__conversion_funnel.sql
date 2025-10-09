@@ -25,10 +25,10 @@ group by 1,2
 
 SELECT
     -- Count the number of SESSIONS that included each step
-    SUM(did_view_item) AS sessions_with_view_item,
-    SUM(did_add_to_cart) AS sessions_with_add_to_cart,
-    SUM(did_begin_checkout) AS sessions_with_begin_checkout,
-    SUM(did_add_shipping_info) AS sessions_with_add_shipping,
-    SUM(did_add_payment_info) AS sessions_with_add_payment,
-    SUM(did_purchase) AS sessions_with_purchase
+    SUM(did_view_item)::int AS sessions_with_view_item,
+    SUM(did_add_to_cart)::int AS sessions_with_add_to_cart,
+    SUM(did_begin_checkout)::int AS sessions_with_begin_checkout,
+    SUM(did_add_shipping_info)::int AS sessions_with_add_shipping,
+    SUM(did_add_payment_info)::int AS sessions_with_add_payment,
+    SUM(did_purchase)::int AS sessions_with_purchase
 FROM funnel_steps

@@ -2,7 +2,7 @@ version: 2
 
 models:
 
-- name: mrt_acquisition_device_cohorts
+- name: mrt__acquisition_device_cohorts
   description: |
     "Calculates monthly user acquisition cohorts based on the device of their first session. It tracks monthly revenue, orders, 
     and purchaser counts for each cohort over time."
@@ -43,7 +43,7 @@ models:
         - dbt_utils.expression_is_true:
             arguments: 
               expression: ">=0"  
-- name: mrt_user_device_segments
+- name: mrt__user_device_segments
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."
@@ -77,7 +77,7 @@ models:
     - name: segment_name
       data_tests:
         - not_null
-- name: mrt_campaign_performance_rev_metrics
+- name: mrt__campaign_performance_rev_metrics
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."
@@ -124,7 +124,7 @@ models:
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
-- name: mrt_first_touch_ltv
+- name: mrt__first_touch_ltv
   description: "..."
   data_tests:
     - dbt_utils.expression_is_true:
