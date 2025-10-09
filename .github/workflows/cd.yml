@@ -57,3 +57,13 @@ jobs:
       # This runs dbt against your PRODUCTION environment.
       - name: Run dbt build for Production
         run: dbt build --target prod
+      
+      - name: Upload prod state (manifest + run_results)
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-state
+          path: |
+            target/manifest.json
+            target/run_results.json
+          if-no-files-found: error
+          retention-days: 14
