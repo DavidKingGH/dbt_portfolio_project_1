@@ -60,7 +60,8 @@ jobs:
       - name: slim ci
         run: |
           dbt deps
+          dbt run --target dev --select "bronze.*"
           dbt build \
             --target dev \
             --state prod_state \
-            --select bronze.* state:modified+
+            --select "state:modified+""
