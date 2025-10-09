@@ -40,7 +40,7 @@ select
     date_trunc('month', order_date) as order_month,
     revenue    
 from acquisition_cohorts ac
-left join stg__user_orders uo 
+left join {{ ref('stg__user_orders') }} uo 
     on ac.user_id =  uo.user_id
     where uo.order_date is not null
 ),
