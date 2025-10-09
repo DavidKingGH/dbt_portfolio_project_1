@@ -131,3 +131,19 @@ models:
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
+- name: int__funnel_steps
+  description: ... 
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments: 
+          combination_of_columns: ['user_id', 'ga_session_id']
+  columns: 
+    - name: user_id
+      description: Co-Primary key
+      data_tests: 
+        - unique
+        - not_null
+    - name: ga_session_id
+      data_tests: 
+        - not_null
+        
