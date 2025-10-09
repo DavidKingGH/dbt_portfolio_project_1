@@ -62,6 +62,5 @@ jobs:
           dbt deps
           dbt build \
             --target dev \
-            --defer \
             --state prod_state \
             --select state:modified+
