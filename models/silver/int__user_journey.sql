@@ -11,6 +11,6 @@ SELECT
 FROM
     {{ ref('stg__conversion_events') }} AS c
 LEFT JOIN
-    {{ ref('int__campaign_touchpoints') }} AS t
+    {{ ref('int__purchase_touchpoints') }} AS t
     ON c.user_id = t.user_id
     and t.touchpoint_timestamp between c.purchase_timestamp - interval '30' day and c.purchase_timestamp
