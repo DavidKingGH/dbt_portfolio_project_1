@@ -14,7 +14,7 @@ WHERE
 touchpoint_source IS NOT NULL 
 AND touchpoint_source NOT IN ('(direct)', '<Other>', '(data deleted)')
 AND touchpoint_medium IS NOT NULL
-AND touchpoint_medium NOT IN ('(none)', '(not set)', 'referral', '<Other>', '(data deleted)', 'organic') 
+AND touchpoint_medium NOT IN ('(none)', '(not set)', '<Other>', '(data deleted)') 
 
 )
 
