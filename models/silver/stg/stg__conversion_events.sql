@@ -6,10 +6,9 @@ select
     fe.ga_session_id,
     fe.event_timestamp,
     fei.item_id,
-    fei.item_revenue_in_usd,
+    fei.item_revenue_in_usd
 from {{ ref('fct_events')}} fe
-join {{ ref('fct_event_items')}} fei
-using (event_id)
+join {{ ref('fct_event_items')}} fei using (event_id)
 where event_name = 'purchase'
 ),
 

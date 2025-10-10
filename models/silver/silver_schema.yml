@@ -1,6 +1,42 @@
 version: 2
 
 models:
+- name: stg__conversion_events
+  description: ...
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        name: test_model_grain
+        arguments:
+          combination_of_columns: ['purchase_id', 'user_id', 'ga_session_id']
+    - dbt_utils.expression_is_true:
+        arguments: 
+          expression: "purchase_revenue >=0"
+    - dbt_utils.expression_is_true:
+        arguments: 
+          expression: "distinct_item_count >=1"
+  columns:
+    - name: purchase_id
+      description: primary key
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              to: ref('fct_events')
+              field: event_id
+    - name: user_id
+      data_tests:
+        - not_null
+    - name: ga_session_id
+      data_tests:
+        - not_null
+    - name: purchase_revenue
+      data_tests:
+        - not_null
+    - name: distinct_item_count
+      data_tests: 
+        - not_null
+
 
 - name: stg__user_orders
   description: Summarizes the revenue for each item within each purchase event.
@@ -78,18 +114,6 @@ models:
         - accepted_values:
             arguments:
               values: ['desktop', 'mobile', 'tablet']
-    - name: session_source
-      data_tests:
-        - not_null
-    - name: session_medium
-      data_tests: 
-        - not_null
-    - name: landing_page
-      data_tests: 
-        - not_null
-    - name: country
-      data_tests: 
-        - not_null
     - name: event_count
       data_tests:
         - dbt_utils.expression_is_true: 
@@ -114,6 +138,38 @@ models:
       data_tests:
         - not_null
         - dbt_utils.not_empty_string
+- name: int__campaign_touchpoints
+  description: "Non-direct marketing touchpoints for multi-touch attribution"
+  
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+        combination_of_columns: ['user_id', 'ga_session_id']
+    
+  - dbt_utils.expression_is_true:
+        name: filtering_logic_applied
+        expression: |
+          touchpoint_source != '(direct)' 
+          AND touchpoint_medium NOT IN ('(none)', '(not set)')
+    
+  - dbt_utils.fewer_rows_than:
+        compare_model: ref('stg__user_sessions')
+  
+  columns:
+    - name: user_id
+      data_tests:
+        - not_null
+    - name: ga_session_id
+      data_tests:
+        - not_null
+    - name: touchpoint_timestamp
+      data_tests:
+        - not_null
+    - name: touchpoint_source
+      data_tests:
+        - not_null
+    - name: touchpoint_medium
+      data_tests:
+        - not_null
 - name: int__customer_revenue
   description: '...'
   columns:
