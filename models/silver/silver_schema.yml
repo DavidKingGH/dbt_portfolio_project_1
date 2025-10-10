@@ -131,3 +131,51 @@ models:
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
+- name: int__purchase_touchpoints
+  description: "Attribution model linking purchases to marketing touchpoints within 30-day window"
+  
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        combination_of_columns: 
+          - purchase_id
+          - touchpoint_timestamp
+          - touchpoint_source
+          - touchpoint_medium
+    
+    - dbt_utils.expression_is_true:
+        name: touchpoints_precede_purchase
+        arguments:
+          expression: "touchpoint_timestamp <= purchase_timestamp"
+    
+    - dbt_utils.expression_is_true:
+        name: touchpoints_within_30_days
+        arguments:
+          expression: "touchpoint_timestamp >= purchase_timestamp - INTERVAL '30' day"
+
+  columns:
+    - name: purchase_id
+      description: "Purchase identifier - one purchase can have multiple touchpoints"
+      data_tests:
+        - not_null
+        - relationships:
+            to: ref('stg__conversion_events')
+            field: purchase_id
+    
+    - name: user_id
+      description: "User who made the purchase"
+      data_tests:
+        - not_null
+    
+    - name: purchase_timestamp
+      description: "When the purchase occurred"
+      data_tests:
+        - not_null
+    
+    - name: touchpoint_timestamp
+      description: "When the marketing touchpoint occurred (within 30 days before purchase)"
+    
+    - name: touchpoint_source
+      description: "Marketing source for the touchpoint"
+    
+    - name: touchpoint_medium
+      description: "Marketing medium for the touchpoint"
