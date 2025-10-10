@@ -49,7 +49,7 @@ jobs:
                   threads: 4
             EOF
       
-      # Step 5: Download manifest.json file from the prod environment 
+      #Step 5: Download manifest.json file from the prod environment 
       - name: Download prod manifest from CD workflow
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -59,8 +59,8 @@ jobs:
           path: prod_state
           github_token: ${{ secrets.GITHUB_TOKEN }}
       
-      # Step 6: Slim CI - defer to prod manifest except for the models which've changed.
-      - name: slim ci
+      # Step 6: dbt build
+      - name: dbt build
         run: |
           dbt deps
           dbt build \
