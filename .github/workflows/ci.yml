@@ -49,15 +49,15 @@ jobs:
                   threads: 4
             EOF
       
-      # Step 5: Download manifest.json file from the prod environment 
-      # - name: Download prod manifest from CD workflow
-        # uses: dawidd6/action-download-artifact@v3
-        # with:
-        #   workflow: cd.yml
-        #   workflow_conclusion: success
-        #   name: prod-state
-        #   path: prod_state
-        #   github_token: ${{ secrets.GITHUB_TOKEN }}
+      #Step 5: Download manifest.json file from the prod environment 
+      - name: Download prod manifest from CD workflow
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: cd.yml
+          workflow_conclusion: success
+          name: prod-state
+          path: prod_state
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       
       # Step 6: dbt build
       - name: dbt build
