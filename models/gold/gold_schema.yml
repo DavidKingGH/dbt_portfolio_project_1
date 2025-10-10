@@ -211,3 +211,131 @@ models:
       data_type: integer
       constraints:
         - type: not_null
+- name: mrt__first_touch_attribution
+  description: first-touch attribution per purchase 
+  config:
+    tags: ['gold', 'marketing_attribution']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: purchase_after_first_touch
+        arguments:
+          expression: "purchase_timestamp >= touchpoint_timestamp "
+    - dbt_utils.unique_combination_of_columns: 
+        name: confirm_grain
+        arguments: 
+          combination_of_columns: ['purchase_id', 'user_id']
+    - dbt_utils.expression_is_true:
+        name: has_revenue
+        arguments:
+          expression: "purchase_revenue >= 0"
+  columns: 
+    - name: purchase_id
+      description: primary key
+      data_type: varchar
+      data_tests:
+        - not_null
+        - unique
+        - relationships:
+            arguments: 
+              to: ref('int__purchase_touchpoints')
+              field: purchase_id
+      constraints:
+        - type: not_null
+        - type: unique
+
+    - name: user_id
+      data_type: varchar
+      data_tests:
+        - not_null
+      constraints: 
+        - type: not_null
+    - name: purchase_revenue
+      data_type: float
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: purchase_timestamp
+      data_type: timestamp
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: touchpoint_timestamp
+      data_type: timestamp
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: touchpoint_source
+      data_type: varchar
+
+    - name: touchpoint_medium
+      data_type: varchar
+
+    
+- name: mrt__last_touch_attribution
+  description: last-touch attribution per purchase 
+  config:
+    tags: ['gold', 'marketing_attribution']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: purchase_after_last_touch
+        arguments:
+          expression: "purchase_timestamp >= touchpoint_timestamp "
+    - dbt_utils.unique_combination_of_columns: 
+        name: confirm_grain
+        arguments: 
+          combination_of_columns: ['purchase_id', 'user_id']
+    - dbt_utils.expression_is_true:
+        name: has_revenue
+        arguments:
+          expression: "purchase_revenue >= 0"
+  columns: 
+    - name: purchase_id
+      description: primary key
+      data_type: varchar
+      data_tests:
+        - not_null
+        - unique
+        - relationships:
+            arguments: 
+              to: ref('int__purchase_touchpoints')
+              field: purchase_id
+      constraints:
+        - type: not_null
+        - type: unique
+
+    - name: user_id
+      data_type: varchar
+      data_tests:
+        - not_null
+      constraints: 
+        - type: not_null
+    - name: purchase_revenue
+      data_type: float
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: purchase_timestamp
+      data_type: timestamp
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: touchpoint_timestamp
+      data_type: timestamp
+      data_tests:
+        - not_null
+      constraints:
+        - type: not_null
+    - name: touchpoint_source
+      data_type: varchar
+
+    - name: touchpoint_medium
+      data_type: varchar

@@ -138,38 +138,7 @@ models:
       data_tests:
         - not_null
         - dbt_utils.not_empty_string
-- name: int__campaign_touchpoints
-  description: "Non-direct marketing touchpoints for multi-touch attribution"
-  
-  data_tests:
-  - dbt_utils.unique_combination_of_columns:
-        combination_of_columns: ['user_id', 'ga_session_id']
-    
-  - dbt_utils.expression_is_true:
-        name: filtering_logic_applied
-        expression: |
-          touchpoint_source != '(direct)' 
-          AND touchpoint_medium NOT IN ('(none)', '(not set)')
-    
-  - dbt_utils.fewer_rows_than:
-        compare_model: ref('stg__user_sessions')
-  
-  columns:
-    - name: user_id
-      data_tests:
-        - not_null
-    - name: ga_session_id
-      data_tests:
-        - not_null
-    - name: touchpoint_timestamp
-      data_tests:
-        - not_null
-    - name: touchpoint_source
-      data_tests:
-        - not_null
-    - name: touchpoint_medium
-      data_tests:
-        - not_null
+
 - name: int__customer_revenue
   description: '...'
   columns:

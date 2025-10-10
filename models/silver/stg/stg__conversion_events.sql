@@ -35,7 +35,7 @@ select
     pe.event_id AS purchase_id, 
     pe.user_id,
     pe.ga_session_id,
-    CAST(pe.event_timestamp as date) AS purchase_timestamp,
+    pe.event_timestamp AS purchase_timestamp,
     COALESCE(pr.revenue, 0) as purchase_revenue,
     pr.distinct_item_count
 from purchase_events pe

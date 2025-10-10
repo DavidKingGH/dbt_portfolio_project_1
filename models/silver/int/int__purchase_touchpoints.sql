@@ -5,12 +5,14 @@ SELECT
     c.purchase_timestamp,
 
     -- Touchpoint Info
-    t.touchpoint_timestamp,
-    t.touchpoint_source,
-    t.touchpoint_medium
+    us.session_start_timestamp AS touchpoint_timestamp,
+    us.session_source AS touchpoint_source,
+    us.session_medium AS touchpoint_medium  
+
 FROM
     {{ ref('stg__conversion_events') }} AS c
 LEFT JOIN
-    {{ ref('int__campaign_touchpoints') }} AS t
-    ON c.user_id = t.user_id
-    and t.touchpoint_timestamp between c.purchase_timestamp - interval '30' day and c.purchase_timestamp
+    {{ ref('stg__user_sessions') }} AS us
+    ON c.user_id = us.user_id 
+        AND us.session_start_timestamp < c.purchase_timestamp
+        AND us.session_start_timestamp >= c.purchase_timestamp - INTERVAL '30' DAY
