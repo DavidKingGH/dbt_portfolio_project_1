@@ -16,7 +16,7 @@ AND touchpoint_source NOT IN ('(direct)', '<Other>', '(data deleted)')
 AND touchpoint_medium IS NOT NULL
 AND touchpoint_medium NOT IN ('(none)', '(not set)', '<Other>', '(data deleted)') 
 
-)
+),
 
 ranked AS (
 SELECT
@@ -24,7 +24,7 @@ SELECT
 ROW_NUMBER() OVER (PARTITION BY purchase_id ORDER BY touchpoint_timestamp ASC) AS first_touch_rank
 FROM valid_marketing_touchpoints
 
-),
+)
 
 SELECT
   r.purchase_id::varchar as purchase_id,

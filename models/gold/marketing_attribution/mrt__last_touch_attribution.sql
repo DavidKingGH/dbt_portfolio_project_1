@@ -16,13 +16,12 @@ AND touchpoint_source NOT IN ('(direct)', '<Other>', '(data deleted)')
 AND touchpoint_medium IS NOT NULL
 AND touchpoint_medium NOT IN ('(none)', '(not set)', '<Other>', '(data deleted)') 
 
-)
+),
 
  ranked AS (
-  SELECT
-    *,
+SELECT *,
     ROW_NUMBER() OVER (PARTITION BY purchase_id ORDER BY touchpoint_timestamp DESC) AS last_touch_rank
-  FROM {{ ref('int__purchase_touchpoints') }}
+  FROM valid_marketing_touchpoints
 )
 
 SELECT
@@ -35,4 +34,4 @@ SELECT
   r.touchpoint_medium::varchar as touchpoint_medium
 FROM ranked r
 JOIN {{ ref('stg__conversion_events') }} c USING (purchase_id)
-WHERE r.last_touch_rank = 1
+WHERE last_touch_rank = 1
