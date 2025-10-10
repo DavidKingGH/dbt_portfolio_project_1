@@ -63,4 +63,5 @@ jobs:
           dbt build \
             --target dev \
             --state prod_state \
-            --select "+state:modified"
+            --select "+state:modified+"
+            --exclude "bronze.*"
