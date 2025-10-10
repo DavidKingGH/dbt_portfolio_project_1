@@ -8,14 +8,13 @@ on:
 permissions:
   contents: read
   actions: read
- 
-
+  
 jobs:
   dbt_ci_build:
     runs-on: ubuntu-latest
     env:
       MOTHERDUCK_TOKEN_DEV: ${{ secrets.MOTHERDUCK_TOKEN }}
-  
+
     steps:
       # Step 1: Check out your repository code
       # This will now include your packages.yml file
