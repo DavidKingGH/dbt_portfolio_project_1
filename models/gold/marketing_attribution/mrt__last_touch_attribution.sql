@@ -1,4 +1,24 @@
-WITH ranked AS (
+WITH all_touchpoints as (
+
+SELECT *
+from {{ ref('int__purchase_touchpoints') }}
+
+),
+
+valid_marketing_touchpoints as (
+
+SELECT *
+FROM all_touchpoints
+WHERE
+-- Exclude direct and non-tracked traffic
+touchpoint_source IS NOT NULL 
+AND touchpoint_source NOT IN ('(direct)', '<Other>', '(data deleted)')
+AND touchpoint_medium IS NOT NULL
+AND touchpoint_medium NOT IN ('(none)', '(not set)', 'referral', '<Other>', '(data deleted)', 'organic') 
+
+)
+
+ ranked AS (
   SELECT
     *,
     ROW_NUMBER() OVER (PARTITION BY purchase_id ORDER BY touchpoint_timestamp DESC) AS last_touch_rank
