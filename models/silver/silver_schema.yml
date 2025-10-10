@@ -37,42 +37,6 @@ models:
       data_tests: 
         - not_null
 
-- name: stg__conversion_events
-  description: ...
-  data_tests:
-    - dbt_utils.unique_combination_of_columns:
-        name: test_model_grain
-        arguments:
-          combination_of_columns: ['purchase_id', 'user_id', 'ga_session_id']
-    - dbt_utils.expression_is_true:
-        arguments: 
-          expression: "purchase_revenue >=0"
-    - dbt_utils.expression_is_true:
-        arguments: 
-          expression: "distinct_item_count >=1"
-  columns:
-    - name: purchase_id
-      description: primary key
-      data_tests:
-        - unique
-        - not_null
-        - relationships:
-            arguments:
-              to: ref('fct_events')
-              field: event_id
-    - name: user_id
-      data_tests:
-        - not_null
-    - name: ga_session_id
-      data_tests:
-        - not_null
-    - name: purchase_revenue
-      data_tests:
-        - not_null
-    - name: distinct_item_count
-      data_tests: 
-        - not_null
-
 
 - name: stg__user_orders
   description: Summarizes the revenue for each item within each purchase event.
