@@ -235,3 +235,5 @@ models:
     
     - name: touchpoint_medium
       description: "Marketing medium for the touchpoint"
+
+#
