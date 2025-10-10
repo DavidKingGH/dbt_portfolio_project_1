@@ -1,10 +1,6 @@
 with source as (
-
-{% if target.name == 'prod' %}
-    select * from {{ source('bronze', 'fact_event_items') }}
-{% else %}
-    select * from read_parquet('ga4_data/fct/fact_event_items/*.parquet')
-{% endif %}
+	
+select * from {{ source('bronze', 'fact_event_items') }}
 
 ),
 

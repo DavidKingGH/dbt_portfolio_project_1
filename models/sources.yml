@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: bronze
     description: "Source data for GA4"
-    schema: "{{ 'ga4_raw' if target.name == 'prod' else none }}"
+    schema: ga4_raw
     
     tables:
       - name: dim_items

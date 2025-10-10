@@ -42,7 +42,9 @@ jobs:
               outputs:
                 dev:
                   type: duckdb
-                  path: "dbt_warehouse.duckdb"
+                  path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
+                  schema: analytics_dev
+                  threads: 4
             EOF
       
       # Step 5: Download manifest.json file from the prod environment 
@@ -59,9 +61,8 @@ jobs:
       - name: slim ci
         run: |
           dbt deps
-          dbt run --target dev --select "bronze.*"
           dbt build \
             --target dev \
+            --defer \
             --state prod_state \
-            --select "+state:modified+"
-            --exclude "bronze.*"
+            --select "state:modified+"
