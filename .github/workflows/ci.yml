@@ -9,6 +9,10 @@ permissions:
   contents: read
   actions: read
 
+env:
+  MOTHERDUCK_TOKEN_DEV: ${{ secrets.MOTHERDUCK_TOKEN_DEV }}
+  
+
 jobs:
   dbt_ci_build:
     runs-on: ubuntu-latest
