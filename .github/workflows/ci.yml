@@ -46,22 +46,20 @@ jobs:
             EOF
       
       # Step 5: Download manifest.json file from the prod environment 
-      - name: Download prod manifest from CD workflow
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: cd.yml
-          workflow_conclusion: success
-          name: prod-state
-          path: prod_state
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Download prod manifest from CD workflow
+        # uses: dawidd6/action-download-artifact@v3
+        # with:
+        #   workflow: cd.yml
+        #   workflow_conclusion: success
+        #   name: prod-state
+        #   path: prod_state
+        #   github_token: ${{ secrets.GITHUB_TOKEN }}
       
-      # Step 6: Slim CI - defer to prod manifest except for the models which've changed.
-      - name: slim ci
+      # Step 6: dbt build
+      - name: dbt build
         run: |
           dbt deps
           dbt run --target dev --select "bronze.*"
           dbt build \
             --target dev \
-            --state prod_state \
-            --select "+state:modified+"
             --exclude "bronze.*"
