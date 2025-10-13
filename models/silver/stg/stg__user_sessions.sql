@@ -14,7 +14,7 @@ select
     user_id, 
     ga_session_id,
     MIN(event_timestamp) as session_start_timestamp, 
-    MAX(event_timestamp) as session_end_timestamp, 
+    MAX(event_timestamp) as session_end_timestamp,
 
     -- Conditionally aggregate to get the value from the *first* event
     max(case when session_event_rank = 1 then device_category end) as device_category,
