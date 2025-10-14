@@ -49,7 +49,7 @@ select
     date_diff('day', lpd.max_purchase_date, md.as_of_date)::int as recency, 
     -- frequency/monetary = windowed metrics
     COUNT(distinct w.purchase_id)::int as frequency,
-    COALESCE(SUM(w.revenue)::double,0.0) as monetary,
+    COALESCE(SUM(w.revenue)::decimal,0.0) as monetary,
     md.as_of_date::date as as_of_date,
     lpd.max_purchase_date::date as max_purchase_date
 from last_purchase_date lpd
