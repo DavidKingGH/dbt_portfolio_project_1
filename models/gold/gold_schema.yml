@@ -339,3 +339,145 @@ models:
 
     - name: touchpoint_medium
       data_type: varchar
+- name: mrt__rfm
+  description: "RFM (Recency, Frequency, Monetary) segmentation for customer value analysis based on 365-day window"
+  config:
+    tags: ['gold', 'rfm_segmentation']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        name: confirm_grain 
+        arguments:
+          combination_of_columns: ['user_id','as_of_date']
+    - dbt_utils.expression_is_true: 
+        name: last_purchase_before_analysis_date
+        arguments:
+          expression: "max_purchase_date <= as_of_date"
+    - dbt_utils.expression_is_true:
+        name: valid_rfm_metrics
+        arguments: 
+          expression: "frequency >= 0 AND monetary >= 0 AND recency >= 0"
+    - dbt_utils.expression_is_true:
+        name: recency_matches_calculation
+        expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
+        config:
+          severity: warn
+  
+  columns:
+  - name: user_id
+    description: "Primary key - one row per customer."
+    data_type: varchar
+    constraints:
+      - type: unique
+      - type: not_null
+  - name: recency
+    description: "Days since last purchase (lower = more recent)"
+    data_type: int
+    constraints: 
+      - type: not_null
+
+  - name: frequency
+    description: "Number of purchases in last 365 days"
+    data_type: int
+    constraints: 
+      - type: not_null
+
+  - name: monetary
+    description: "Total revenue in last 365 days"
+    data_type: decimal
+    constraints: 
+      - type: not_null
+
+  - name: max_purchase_date
+    description: "Date of customer's most recent purchase (any time period)"
+    data_type: date
+    constraints:
+      - type: not_null
+  
+  - name: as_of_date
+    description: "Analysis cutoff date (max date in dataset)"
+    data_type: date
+    constraints:
+      - type: not_null
+
+- name: mrt__rfm_scoring
+  description: "RFM (Recency, Frequency, Monetary) segmentation for customer value analysis based on 365-day window"
+  config:
+    tags: ['gold', 'rfm_segmentation']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        name: confirm_grain 
+        arguments:
+          combination_of_columns: ['user_id','as_of_date']
+    - dbt_utils.expression_is_true:
+        name: all_customers_segmented
+        expression: "rfm_segment != 'other'"
+        config:
+          severity: warn  # Warn if some fall into 'other' 
+  columns:
+  - name: user_id
+    description: "Primary key - one row per customer."
+    data_type: varchar
+    constraints:
+      - type: not_null
+    data_tests: 
+      - relationships: 
+          arguments: 
+            to: ref('mrt__rfm')
+            field: user_id
+  - name: recency
+    description: "Days since last purchase (lower = more recent)"
+    data_type: int
+    constraints: 
+      - type: not_null
+  - name: frequency
+    description: "Number of purchases in last 365 days"
+    data_type: int
+    constraints: 
+      - type: not_null
+  - name: monetary
+    description: "Total revenue in last 365 days"
+    data_type: decimal
+    constraints: 
+      - type: not_null
+  - name: as_of_date
+    description: "Snapshot date for scoring"
+    data_type: date
+    constraints: 
+      - type: not_null
+  - name: r_score
+    description: "Recency quintiles (5=most recent, 1=least recent)"
+    data_type: int
+    constraints:
+      - type: not_null
+    data_tests:
+      - dbt_utils.expression_is_true: 
+          arguments:
+            expression: "BETWEEN 1 AND 5"
+  - name: f_score
+    description: "Frequency quintiles (5=most frequent, 1=least frequent)"
+    data_type: int
+    constraints:
+      - type: not_null
+    data_tests:
+      - dbt_utils.expression_is_true: 
+          arguments:
+            expression: "BETWEEN 1 AND 5"
+  - name: m_score
+    description: "Monetary quintiles (5=most value, 1=least value)"
+    data_type: int
+    constraints:
+      - type: not_null
+    data_tests:
+      - dbt_utils.expression_is_true: 
+          arguments:
+            expression: "BETWEEN 1 AND 5"
+  - name: rfm_segment
+    description: "User categories per rfm performance"
+    data_type: varchar
+    constraints: 
+      - type: not_null
+    
