@@ -44,7 +44,6 @@ kpi_summary as (
 select 
 
     max(max_date) as max_date,
-    user_id,
    -- browse-to-buy counts
     count(distinct case when event_name = 'purchase' then user_id end) as purchasers_overall,
     count(distinct case when event_name = 'view_item' then user_id end) as browsers_overall,
@@ -68,7 +67,6 @@ from events_labeled_30d
 
 select
     max_date::date as as_of_date,
-    user_id
     --browse-to-buy rates
     (purchasers_overall::double) / nullif(browsers_overall,0) as browse_to_buy_overall,
     (purchasers_new::double) / nullif(browsers_new,0) as browse_to_buy_new,

@@ -40,7 +40,7 @@ select
     distinct fe.ga_session_id
 from {{ ref('fct_events')}} fe
 cross join report_date a 
-where fe.event_name = 'purchase'
+where fe.event_name = 'begin_checkout'
     and fe.event_timestamp <= a.as_of_date
     and fe.event_timestamp >= a.as_of_date - interval '30' day
 ),

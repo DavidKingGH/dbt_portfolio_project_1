@@ -97,7 +97,7 @@ models:
         - not_null
         - relationships: 
             arguments:
-              to: ref('fct_events')
+              to: ref('dim_users')
               field: user_id
     - name: ga_session_id
       data_tests: 
@@ -129,7 +129,7 @@ models:
         - relationships:
             arguments:
               field: user_id
-              to: ref('stg__user_sessions')
+              to: ref('dim_users')
     - name: session_source
       data_tests:
         - not_null
@@ -149,7 +149,7 @@ models:
         - relationships:
             arguments:
               field: user_id
-              to: ref('stg__conversion_events')
+              to: ref('dim_users')
     - name: total_revenue
       data_tests:
         - not_null
