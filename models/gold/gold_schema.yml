@@ -480,4 +480,164 @@ models:
     data_type: varchar
     constraints: 
       - type: not_null
+- name: mrt__funnel_steps_last_30d
+  description: "30-day rolling window KPIs: conversion rates and funnel metrics"
+  config:
+    tags: ['gold', 'predictive_features', 'kpi_dashboard']
+    contract:
+      enforced: true
+  
+  data_tests: 
+    - dbt_utils.unique_combination_of_columns:
+        arguments: 
+          combination_of_columns: ['user_id','as_of_date']
+    - dbt_utils.expression_is_true: 
+        name: valid_browse_to_buy_rates
+        arguments: 
+          expression: |
+            (browse_to_buy_overall IS NULL OR (browse_to_buy_overall >= 0 AND browse_to_buy_overall <= 1))
+            AND (browse_to_buy_new IS NULL OR (browse_to_buy_new >= 0 AND browse_to_buy_new <= 1))
+            AND (browse_to_buy_returning IS NULL OR (browse_to_buy_returning >= 0 AND browse_to_buy_returning <= 1))
+  
+    - dbt_utils.expression_is_true: 
+        name: high_intent_users_nonnegative
+        arguments: 
+          expression: "high_intent_users_overall >= 0"
+
+
+    - dbt_utils.expression_is_true: 
+        name: valid_dropoff_rate
+        arguments:
+          expression: "dropoff_rate_at_shipping IS NULL OR (dropoff_rate_at_shipping >= 0 AND dropoff_rate_at_shipping <= 1)"
+ 
+    - dbt_utils.expression_is_true:
+        name: valid_funnel_rates
+        arguments:
+        expression: |
+          (rate_cart_to_checkout IS NULL OR (rate_cart_to_checkout >= 0 AND rate_cart_to_checkout <= 1))
+          AND (rate_checkout_to_shipping IS NULL OR (rate_checkout_to_shipping >= 0 AND rate_checkout_to_shipping <= 1))
+          AND (rate_shipping_to_payment IS NULL OR (rate_shipping_to_payment >= 0 AND rate_shipping_to_payment <= 1))
+  
+  columns:
+    - name: as_of_date
+      description: "End date of 30-day window (max event_date)"
+      data_type: date
+      constraints:
+        - type: not_null
+    - name: user_id
+      description: '...'
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests: 
+        - relationships: 
+            arguments: 
+              to: ref('fct_events')
+              field: user_id
     
+    - name: browse_to_buy_overall
+      description: "Conversion rate: purchasers / browsers (all users)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    
+    - name: browse_to_buy_new
+      description: "Conversion rate for new users (first seen in 30-day window)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    
+    - name: browse_to_buy_returning
+      description: "Conversion rate for returning users (first seen before window)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: high_intent_users_overall
+      description: "Count of users who began checkout"
+      data_type: integer
+      constraints: 
+        - type: not_null
+    
+    - name: rate_cart_to_checkout
+      description: "Conversion rate: users who started checkout / users who added to cart"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: rate_checkout_to_shipping
+      description: "Conversion rate: users who added shipping / users who started checkout"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+      
+    - name: rate_shipping_to_payment
+      description: "Conversion rate: users who added payment / users who added shipping"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: dropoff_rate_at_shipping
+      description: "Abandonment rate: users who didn't add payment after adding shipping"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+- name: mrt__item_interactions_last_30d
+  description: '...'
+  config:
+    tags: ['gold', 'predictive_features', 'kpi_dashboard']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments: 
+          combination_of_columns: ['user_id','as_of_date']
+    - dbt_utils.expression_is_true:
+        name: valid_cart_to_view_ratio
+        arguments: 
+          expression: "(cart_to_view_ratio_last_30d is null or cart_to_view_ratio_last_30d >= 0)"
+          config:
+            severity: warn
+    - dbt_utils.expression_is_true:
+        name: abandoned_cart_nonnegative
+        arguments: 
+          expression: "abandoned_cart_value_last_30d >= 0"
+    - dbt_utils.expression_is_true:
+        name: valid_avg_price_carted_items
+        arguments: 
+          expression: "avg_price_of_items_carted_last_30d >= 0"
+    - dbt_utils.expression_is_true:
+        name: specialist_ratio_logical
+        expression: "specialist_ratio_last_30d is null or  specialist_ratio_last_30d >= 0"
+        config:
+          severity: warn  
+  columns: 
+    - name: as_of_date
+      description: "End date of 30-day window (max event_date)"
+      data_type: date
+      constraints: 
+        - type: not_null
+    - name: user_id
+      description: '...'
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests: 
+        - relationships: 
+            arguments: 
+              to: ref('fct_events')
+              field: user_id
+    - name: cart_to_view_ratio_last_30d
+      description: "Ratio of items carted to items viewed (0-1)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    - name: abandoned_cart_value_last_30d
+      description: "Total value of items added to cart but not purchased"
+      data_type: decimal
+      constraints: 
+        - type: not_null
+    - name: avg_price_of_items_carted_last_30d
+      description: "Average price of items added to cart"
+      data_type: decimal
+      # CAN BE NULL if no browsers in window
+    - name: last_carted_category_last_30d
+      description: "Most recent product category added to cart"
+      data_type: varchar
+      # CAN BE NULL if no browsers in window
+    - name: specialist_ratio_last_30d
+      description: "Average items viewed per category (>1 = specialist, <1 = browser)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
