@@ -175,7 +175,7 @@ models:
     - dbt_utils.expression_is_true:
         name: touchpoints_within_30_days
         arguments:
-          expression: "touchpoint_timestamp >= purchase_timestamp - INTERVAL '30' day"
+          expression: "touchpoint_timestamp >= purchase_timestamp - interval '29' day"
 
   columns:
     - name: purchase_id

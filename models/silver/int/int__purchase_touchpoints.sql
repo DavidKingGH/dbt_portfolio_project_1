@@ -15,4 +15,4 @@ LEFT JOIN
     {{ ref('stg__user_sessions') }} AS us
     ON c.user_id = us.user_id 
         AND us.session_start_timestamp < c.purchase_timestamp
-        AND us.session_start_timestamp >= c.purchase_timestamp - INTERVAL '30' DAY
+        AND us.session_start_timestamp >= c.purchase_timestamp - interval '29' DAY

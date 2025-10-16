@@ -32,7 +32,7 @@ join {{ ref('fct_event_items')}} bfei on bfe.event_id = bfei.event_id
 left join dim_items_deduplicated did on did.item_id = bfei.item_id
 cross join report_date a
 where bfe.event_timestamp <= a.as_of_date 
-and bfe.event_timestamp >= a.as_of_date - interval '30' day
+and bfe.event_timestamp >= a.as_of_date - interval '29' day
 ),
 
 sessions_with_checkout_30d as (
@@ -42,7 +42,7 @@ from {{ ref('fct_events')}} fe
 cross join report_date a 
 where fe.event_name = 'begin_checkout'
     and fe.event_timestamp <= a.as_of_date
-    and fe.event_timestamp >= a.as_of_date - interval '30' day
+    and fe.event_timestamp >= a.as_of_date - interval '29' day
 ),
 
 int_last_item_category as (
