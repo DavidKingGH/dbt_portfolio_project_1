@@ -35,7 +35,7 @@ where bfe.event_timestamp <= a.as_of_date
 and bfe.event_timestamp >= a.as_of_date - interval '30' day
 ),
 
-sessions_with_purchase_30d as (
+sessions_with_checkout_30d as (
 select 
     distinct fe.ga_session_id
 from {{ ref('fct_events')}} fe
@@ -77,7 +77,7 @@ select
 
 
 from item_interactions_last_30d ii
-left join sessions_with_purchase_30d sp on ii.ga_session_id = sp.ga_session_id
+left join sessions_with_checkout_30d sp on ii.ga_session_id = sp.ga_session_id
 group by user_id
 ),
 
