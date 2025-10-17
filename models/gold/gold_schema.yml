@@ -363,7 +363,13 @@ models:
         expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
         config:
           severity: warn
-  
+
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        expression: "as_of_date <= CURRENT_DATE"
+        config:
+          severity: warn
+
   columns:
   - name: user_id
     description: "Primary key - one row per customer."
@@ -515,13 +521,19 @@ models:
           AND (rate_checkout_to_shipping IS NULL OR (rate_checkout_to_shipping >= 0 AND rate_checkout_to_shipping <= 1))
           AND (rate_shipping_to_payment IS NULL OR (rate_shipping_to_payment >= 0 AND rate_shipping_to_payment <= 1))
   
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        expression: "as_of_date <= CURRENT_DATE"
+        config:
+          severity: warn
+
   columns:
     - name: as_of_date
       description: "End date of 30-day window (max event_date)"
       data_type: date
       constraints:
         - type: not_null
-    
+
     - name: browse_to_buy_overall
       description: "Conversion rate: purchasers / browsers (all users)"
       data_type: double
@@ -591,12 +603,20 @@ models:
         expression: "specialist_ratio_last_30d is null or  specialist_ratio_last_30d >= 0"
         config:
           severity: warn  
+
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        expression: "as_of_date <= CURRENT_DATE"
+        config:
+          severity: warn
+
   columns: 
     - name: as_of_date
       description: "End date of 30-day window (max event_date)"
       data_type: date
       constraints: 
         - type: not_null
+
     - name: user_id
       description: '...'
       data_type: varchar
@@ -628,3 +648,87 @@ models:
       description: "Average items viewed per category (>1 = specialist, <1 = browser)"
       data_type: double
       # CAN BE NULL if no browsers in window
+- name: mrt__engagement_intensity_last_30d
+  description: '...'
+  config:
+    tags: ['gold', 'kpi_dashboard', 'predictive_features']
+    contract: 
+      enforced: true
+
+  data_tests:
+    - dbt_utils.unique_combination_of_columns: 
+        name: confirm_grain
+        arguments: 
+          combination_of_columns: ['as_of_date', 'user_id']
+
+    - dbt_utils.expression_is_true:
+        name: recency_logical
+        arguments:
+          expression: "days_since_last_session >= 0 OR days_since_last_session IS NULL" 
+        config:
+          severity: warn
+    
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        expression: "as_of_date <= CURRENT_DATE"
+        config:
+          severity: warn
+
+    - dbt_utils.expression_is_true:
+        name: events_per_session_logical
+        expression: |
+          user_sessions_last_30d IS NULL 
+          OR event_count_last_30d IS NULL
+          OR event_count_last_30d >= user_sessions_last_30d
+        config:
+          severity: warn
+  
+  columns:
+    - name: as_of_date
+      description: "End date of 30-day window"
+      data_type: date
+      constraints: 
+        - type: not_null
+    
+    - name: user_id
+      description: "User identifier"
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests: 
+        - relationships: 
+            to: ref('dim_users')
+            field: user_id
+    
+    - name: days_since_last_session
+      description: "Days between last session and snapshot date"
+      data_type: integer
+    
+    - name: user_sessions_last_30d
+      description: "Count of sessions in 30-day window"
+      data_type: integer
+      constraints:
+        - type: not_null
+    
+    - name: avg_session_duration_last_30d_secs
+      description: "Average session duration in seconds"
+      data_type: double
+      constraints:
+        - type: not_null    
+
+    - name: median_inter_session_gap_hours
+      description: "Median time between sessions (hours)"
+      data_type: double  
+      # Can be NULL if user has only 1 session
+    
+    - name: event_count_last_30d
+      description: "Total events in 30-day window"
+      data_type: integer
+      constraints:
+        - type: not_null
+
+    - name: avg_events_per_session_last_30d
+      description: "Average events per session"
+      data_type: double
+      constraints:
+        - type: not_null
