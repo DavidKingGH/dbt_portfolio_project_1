@@ -135,9 +135,10 @@ models:
               severity: warn
     - dbt_utils.expression_is_true:
         name: customers_imply_revenue
-        expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
-        config:
-          severity: warn
+        arguments:
+          expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
+          config:
+            severity: warn
   columns:
     - name: session_source
       data_tests:
@@ -175,16 +176,18 @@ models:
   data_tests:
     - dbt_utils.expression_is_true:
         name: funnel_logic_valid
-        expression: |
-          sessions_with_view_item >= sessions_with_add_to_cart
-          AND sessions_with_add_to_cart >= sessions_with_begin_checkout
-          AND sessions_with_begin_checkout >= sessions_with_add_shipping
-          AND sessions_with_add_shipping >= sessions_with_add_payment
-          AND sessions_with_add_payment >= sessions_with_purchase
-          AND sessions_with_purchase >= 0
+        arguments:
+          expression: |
+            sessions_with_view_item >= sessions_with_add_to_cart
+            AND sessions_with_add_to_cart >= sessions_with_begin_checkout
+            AND sessions_with_begin_checkout >= sessions_with_add_shipping
+            AND sessions_with_add_shipping >= sessions_with_add_payment
+            AND sessions_with_add_payment >= sessions_with_purchase
+            AND sessions_with_purchase >= 0
     - dbt_utils.expression_is_true:
         name: has_data
-        expression: "sessions_with_view_item > 0"
+        arguments:
+          expression: "sessions_with_view_item > 0"
   
   columns:
     - name: sessions_with_view_item
@@ -360,15 +363,17 @@ models:
           expression: "frequency >= 0 AND monetary >= 0 AND recency >= 0"
     - dbt_utils.expression_is_true:
         name: recency_matches_calculation
-        expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
-        config:
-          severity: warn
+        arguments:
+          expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
+          config:
+            severity: warn
 
     - dbt_utils.expression_is_true:
         name: snapshot_date_reasonable
-        expression: "as_of_date <= CURRENT_DATE"
-        config:
-          severity: warn
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
 
   columns:
   - name: user_id
@@ -420,9 +425,10 @@ models:
           combination_of_columns: ['user_id','as_of_date']
     - dbt_utils.expression_is_true:
         name: all_customers_segmented
-        expression: "rfm_segment != 'other'"
-        config:
-          severity: warn  # Warn if some fall into 'other' 
+        arguments:
+          expression: "rfm_segment != 'other'"
+          config:
+            severity: warn  # Warn if some fall into 'other' 
   columns:
   - name: user_id
     description: "Primary key - one row per customer."
@@ -516,16 +522,17 @@ models:
     - dbt_utils.expression_is_true:
         name: valid_funnel_rates
         arguments:
-        expression: |
-          (rate_cart_to_checkout IS NULL OR (rate_cart_to_checkout >= 0 AND rate_cart_to_checkout <= 1))
-          AND (rate_checkout_to_shipping IS NULL OR (rate_checkout_to_shipping >= 0 AND rate_checkout_to_shipping <= 1))
-          AND (rate_shipping_to_payment IS NULL OR (rate_shipping_to_payment >= 0 AND rate_shipping_to_payment <= 1))
-  
+          expression: |
+            (rate_cart_to_checkout IS NULL OR (rate_cart_to_checkout >= 0 AND rate_cart_to_checkout <= 1))
+            AND (rate_checkout_to_shipping IS NULL OR (rate_checkout_to_shipping >= 0 AND rate_checkout_to_shipping <= 1))
+            AND (rate_shipping_to_payment IS NULL OR (rate_shipping_to_payment >= 0 AND rate_shipping_to_payment <= 1))
+    
     - dbt_utils.expression_is_true:
         name: snapshot_date_reasonable
-        expression: "as_of_date <= CURRENT_DATE"
-        config:
-          severity: warn
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
 
   columns:
     - name: as_of_date
@@ -599,16 +606,18 @@ models:
         arguments: 
           expression: "avg_price_of_items_carted_last_30d >= 0"
     - dbt_utils.expression_is_true:
-        name: specialist_ratio_logical
-        expression: "specialist_ratio_last_30d is null or  specialist_ratio_last_30d >= 0"
-        config:
-          severity: warn  
+        name: views_per_category_last_30d_logical
+        arguments:
+          expression: "views_per_category_last_30d is null or  views_per_category_last_30d >= 0"
+          config:
+            severity: warn  
 
     - dbt_utils.expression_is_true:
         name: snapshot_date_reasonable
-        expression: "as_of_date <= CURRENT_DATE"
-        config:
-          severity: warn
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
 
   columns: 
     - name: as_of_date
@@ -634,8 +643,8 @@ models:
     - name: abandoned_cart_value_last_30d
       description: "Total value of items added to cart but not purchased"
       data_type: decimal
-      constraints: 
-        - type: not_null
+      # CAN BE NULL if no browsers in window
+      
     - name: avg_price_of_items_carted_last_30d
       description: "Average price of items added to cart"
       data_type: decimal
@@ -644,7 +653,7 @@ models:
       description: "Most recent product category added to cart"
       data_type: varchar
       # CAN BE NULL if no browsers in window
-    - name: specialist_ratio_last_30d
+    - name: views_per_category_last_30d
       description: "Average items viewed per category (>1 = specialist, <1 = browser)"
       data_type: double
       # CAN BE NULL if no browsers in window
@@ -665,23 +674,25 @@ models:
         name: recency_logical
         arguments:
           expression: "days_since_last_session >= 0 OR days_since_last_session IS NULL" 
-        config:
-          severity: warn
-    
+          config:
+            severity: warn
+      
     - dbt_utils.expression_is_true:
         name: snapshot_date_reasonable
-        expression: "as_of_date <= CURRENT_DATE"
-        config:
-          severity: warn
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
 
     - dbt_utils.expression_is_true:
         name: events_per_session_logical
-        expression: |
-          user_sessions_last_30d IS NULL 
-          OR event_count_last_30d IS NULL
-          OR event_count_last_30d >= user_sessions_last_30d
-        config:
-          severity: warn
+        arguments:
+          expression: |
+            user_sessions_last_30d IS NULL 
+            OR event_count_last_30d IS NULL
+            OR event_count_last_30d >= user_sessions_last_30d
+          config:
+            severity: warn
   
   columns:
     - name: as_of_date
@@ -696,9 +707,10 @@ models:
       constraints:
         - type: not_null
       data_tests: 
-        - relationships: 
-            to: ref('dim_users')
-            field: user_id
+        - relationships:
+            arguments: 
+              to: ref('dim_users')
+              field: user_id
     
     - name: days_since_last_session
       description: "Days between last session and snapshot date"
@@ -730,5 +742,6 @@ models:
     - name: avg_events_per_session_last_30d
       description: "Average events per session"
       data_type: double
-      constraints:
-        - type: not_null
+      # Can be NULL if user had 0 sessions in last 30d
+
+  
