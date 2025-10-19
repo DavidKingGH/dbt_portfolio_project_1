@@ -1,7 +1,5 @@
 with source as (
-SELECT *
-FROM {{ source('bronze', 'fact_events') }}
-
+select * from {{ source('bronze', 'fact_events') }}
 ),
 
 renamed_and_casted as (
@@ -33,8 +31,7 @@ select
 	device_category,
 	operating_system,
 	browser,
-	mobile_brand_name,
-	loaded_at
+	mobile_brand_name
 from source
 )
 

@@ -1,6 +1,42 @@
 version: 2
 
 models:
+- name: stg__conversion_events
+  description: ...
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        name: test_model_grain
+        arguments:
+          combination_of_columns: ['purchase_id', 'user_id', 'ga_session_id']
+    - dbt_utils.expression_is_true:
+        arguments: 
+          expression: "purchase_revenue >=0"
+    - dbt_utils.expression_is_true:
+        arguments: 
+          expression: "distinct_item_count >=1"
+  columns:
+    - name: purchase_id
+      description: primary key
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              to: ref('fct_events')
+              field: event_id
+    - name: user_id
+      data_tests:
+        - not_null
+    - name: ga_session_id
+      data_tests:
+        - not_null
+    - name: purchase_revenue
+      data_tests:
+        - not_null
+    - name: distinct_item_count
+      data_tests: 
+        - not_null
+
 
 - name: stg__user_orders
   description: Summarizes the revenue for each item within each purchase event.
@@ -78,20 +114,95 @@ models:
         - accepted_values:
             arguments:
               values: ['desktop', 'mobile', 'tablet']
-    - name: session_source
-      data_tests:
-        - not_null
-    - name: session_medium
-      data_tests: 
-        - not_null
-    - name: landing_page
-      data_tests: 
-        - not_null
-    - name: country
-      data_tests: 
-        - not_null
     - name: event_count
       data_tests:
         - dbt_utils.expression_is_true: 
             arguments:
               expression: ">0"
+- name: int__acquisition_touchpoints
+  description: First non-direct touchpoint for each user.
+  columns:
+    - name: user_id
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              field: user_id
+              to: ref('stg__user_sessions')
+    - name: session_source
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+    - name: session_medium
+      data_tests:
+        - not_null
+        - dbt_utils.not_empty_string
+
+- name: int__customer_revenue
+  description: '...'
+  columns:
+    - name: user_id
+      data_tests:
+        - unique
+        - not_null
+        - relationships:
+            arguments:
+              field: user_id
+              to: ref('stg__conversion_events')
+    - name: total_revenue
+      data_tests:
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments:
+              expression: ">=0"
+- name: int__purchase_touchpoints
+  description: "Attribution model linking purchases to marketing touchpoints within 30-day window"
+  
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        combination_of_columns: 
+          - purchase_id
+          - touchpoint_timestamp
+          - touchpoint_source
+          - touchpoint_medium
+    
+    - dbt_utils.expression_is_true:
+        name: touchpoints_precede_purchase
+        arguments:
+          expression: "touchpoint_timestamp <= purchase_timestamp"
+    
+    - dbt_utils.expression_is_true:
+        name: touchpoints_within_30_days
+        arguments:
+          expression: "touchpoint_timestamp >= purchase_timestamp - INTERVAL '30' day"
+
+  columns:
+    - name: purchase_id
+      description: "Purchase identifier - one purchase can have multiple touchpoints"
+      data_tests:
+        - not_null
+        - relationships:
+            to: ref('stg__conversion_events')
+            field: purchase_id
+    
+    - name: user_id
+      description: "User who made the purchase"
+      data_tests:
+        - not_null
+    
+    - name: purchase_timestamp
+      description: "When the purchase occurred"
+      data_tests:
+        - not_null
+    
+    - name: touchpoint_timestamp
+      description: "When the marketing touchpoint occurred (within 30 days before purchase)"
+    
+    - name: touchpoint_source
+      description: "Marketing source for the touchpoint"
+    
+    - name: touchpoint_medium
+      description: "Marketing medium for the touchpoint"
+
+#

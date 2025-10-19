@@ -1,6 +1,6 @@
 with source as (
-SELECT *
-FROM {{ source('bronze', 'fact_event_items') }}
+	
+select * from {{ source('bronze', 'fact_event_items') }}
 
 ),
 
@@ -26,8 +26,7 @@ select
 	promotion_id,
 	promotion_name,
 	creative_name,
-	creative_slot,
-	loaded_at
+	creative_slot
 from source
 )
 

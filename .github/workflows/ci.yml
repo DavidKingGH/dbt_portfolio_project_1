@@ -1,15 +1,17 @@
 name: dbt CI Workflow
-
 on:
   push:
     branches:
       - dev
       - 'feature/**'
 
+permissions:
+  contents: read
+  actions: read
+  
 jobs:
   dbt_ci_build:
     runs-on: ubuntu-latest
-
     env:
       MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
 
@@ -31,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install duckdb==1.3.2
           pip install dbt-duckdb
-
+    
       # Step 4: Configure dbt Profile
       - name: Configure dbt Profile
         run: |
@@ -42,21 +44,27 @@ jobs:
               outputs:
                 dev:
                   type: duckdb
-                  path: "C:/Users/David/Downloads/Coding_Projects/dbt/portfolio/.db/dev.duckdb"
-                  schema: main
-                  threads: 4
-                ci:
-                  type: duckdb
                   path: "md:ga4_db?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
                   schema: analytics_dev
                   threads: 4
             EOF
-          
-      # Step 5: Install dbt packages
-      - name: Install dbt packages
-        run: dbt deps --target ci
-
-      # Step 6: Run dbt build
-      # This command will now succeed because the dbt_utils macros are available
-      - name: Run dbt build
-        run: dbt build --target ci
+      
+      #Step 5: Download manifest.json file from the prod environment 
+      - name: Download prod manifest from CD workflow
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: cd.yml
+          workflow_conclusion: success
+          name: prod-state
+          path: prod_state
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Step 6: dbt build
+      - name: dbt build
+        run: |
+          dbt deps
+          dbt build \
+            --target dev \
+            --defer \
+            --state prod_state \
+            --select "state:modified+"
