@@ -3,11 +3,30 @@ select *
 from {{ ref('mrt__user_device_segments') }}
 ),
 
+seg_a as (
+
+select 
+  user_id, 
+  dominant_device,
+  cart_value_quartile, 
+  total_revenue
+from base
+), 
+
+seg_b as (
+select 
+  user_id, 
+  dominant_device,
+  cart_value_quartile, 
+  total_revenue
+from base
+),
+
 violations as (
   -- for any device bucket, a Q4 (supposedly low) user must not outspend any Q1 (supposedly top) user
   select b.user_id as q4_user_id, a.user_id as q1_user_id, a.dominant_device
-  from seg a
-  join seg b
+  from seg_a
+  join seg_b
     on a.dominant_device = b.dominant_device
    and a.cart_value_quartile = 1
    and b.cart_value_quartile = 4

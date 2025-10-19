@@ -24,25 +24,26 @@ models:
         - not_null
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">=0"
+              expression: ">= 0"
     - name: total_revenue
       data_tests:
         - not_null 
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">=0"  
+              expression: ">= 0"  
     - name: orders
       data_tests:
         - not_null 
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">=0"  
+              expression: ">= 0"  
     - name: purchasers
       data_tests:
         - not_null 
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">=0"  
+              expression: ">= 0"  
+
 - name: mrt__user_device_segments
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
