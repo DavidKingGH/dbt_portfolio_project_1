@@ -18,7 +18,7 @@ select
     session_start_timestamp, 
     device_category,
     row_number() over(partition by user_id order by session_start_timestamp asc) as session_rank
-from sessions
+from user_sessions
 ),
 
 acquisition_cohorts as (
