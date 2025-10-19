@@ -47,36 +47,69 @@ models:
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."
+  config:
+    tags: ['gold', 'behavioral_cohorts']
+    contract: 
+      enforced: true
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: revenue_logical
+        arguments:
+          expression: "total_reveue >= 0"
+          config:
+            severity: warn
+    - mrt__user_device_segments_logical:
+        arguments:
+          config: 
+            severity: error 
+
   columns: 
     - name: user_id
-      data_tests: 
-        - not_null
-        - unique
+      description: 'purchaser id'
+      data_type: varchar
+      constraints: 
+        - type: not_null
+        - type: unique
+      data_tests:
         - relationships:
             arguments:
               to: ref('dim_users')
               field: user_id
     - name: dominant_device
-      data_tests: 
-        - not_null
+      description: 'device with most orders; ties broken by revenue, sessions, then alphabetical'
+      data_type: varchar
+      constraints:
+        type: not_null
+      data_tests:
         - accepted_values: 
             arguments: 
               values: ['mobile', 'tablet', 'desktop']
     - name: total_revenue
-      data_tests:
-        - not_null
-        - dbt_utils.expression_is_true:
-            arguments:
-              expression: ">=0"
+      description: 'lifetime revenue on dominant device'
+      data_type: decimal
+      constraints:
+        - type: not_null
     - name: cart_value_quartile
+      description: 'spend quartile within dominant_device (1 = top spenders, 4 = low spenders)'
+      data_type: int
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - accepted_values: 
             arguments: 
               values: [1,2,3,4]
+    - name: total_sessions
+      description: 'total sessons across device category' 
+      data_type: int
+      constraints: 
+        - type: not_null
+
     - name: segment_name
-      data_tests:
-        - not_null
+      description: "human-readable label: '<device> - Q<quartile> (+ top/low badges)"
+      data_type: varchar
+      constraints:
+        - type: not_null
+
 - name: mrt__campaign_performance_rev_metrics
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
@@ -644,7 +677,7 @@ models:
       description: "Total value of items added to cart but not purchased"
       data_type: decimal
       # CAN BE NULL if no browsers in window
-      
+
     - name: avg_price_of_items_carted_last_30d
       description: "Average price of items added to cart"
       data_type: decimal
