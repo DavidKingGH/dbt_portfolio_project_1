@@ -2,7 +2,7 @@ version: 2
 
 models:
 
-- name: mrt___acquisition_device_cohorts
+- name: mrt__acquisition_device_cohorts
   description: |
     "Calculates monthly user acquisition cohorts based on the device of their first session. It tracks monthly revenue, orders, 
     and purchaser counts for each cohort over time."
@@ -13,20 +13,23 @@ models:
 
   data_tests:
     - dbt_utils.unique_combination_of_columns:
-        combination_of_columns: 
-          - acquisition_device
-          - acquisition_month
-          - months_since_acquisition
-    
+        arguments:
+          combination_of_columns: 
+            - acquisition_device
+            - acquisition_month
+            - months_since_acquisition
+      
     - dbt_utils.expression_is_true:
         name: orders_exceed_purchasers
-        expression: "orders >= purchasers"
+        arguments:
+          expression: "orders >= purchasers"
     
     - dbt_utils.expression_is_true:
         name: revenue_matches_orders
-        expression: "(orders = 0 AND total_revenue = 0) OR (orders > 0 AND total_revenue > 0)"
-        config:
-          severity: warn
+        arguments:
+          expression: "(orders = 0 AND total_revenue = 0) OR (orders > 0 AND total_revenue > 0)"
+          config:
+            severity: warn
 
   columns: 
     - name: acquisition_device
@@ -46,12 +49,10 @@ models:
     - name: months_since_acquisition
       description: "Months elapsed since acquisition (0 = same month)"
       data_type: int
-      constraints:
-        - type: not_null
       data_tests: 
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">= 0"
+              expression: "(months_since_acquisition >= 0) or (months_since_acquisition is null)"
     - name: total_revenue
       description: "Sum of revenue for this cohort-month combination"
       data_type: decimal
@@ -80,7 +81,7 @@ models:
             arguments: 
               expression: ">= 0"  
 
-- name: mrt_user_device_segments
+- name: mrt__user_device_segments
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."

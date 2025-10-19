@@ -34,15 +34,15 @@ where session_rank = 1
 cohorts_user_orders as (
 
 select
-    us.user_id,
+    uo.user_id,
     acquisition_device, 
     acquisition_month,
     date_trunc('month', order_date) as order_month,
     revenue    
 from acquisition_cohorts ac
-left join user_sessions us 
-    on ac.user_id =  us.user_id
-    and us.order_date is not null
+left join {{ ref('stg__user_orders') }} uo 
+    on ac.user_id =  uo.user_id
+    and uo.order_date is not null
     and uo.order_date >= ac.acquisition_month
 ),
 
