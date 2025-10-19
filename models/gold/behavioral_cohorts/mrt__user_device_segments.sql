@@ -41,7 +41,7 @@ quartile_user_top_devices as (
         device_category as dominant_device,
         total_revenue,
         total_sessions,
-        ntile(4) over(partition by device_category order by orders_on_device desc, total_revenue DESC, total_sessions desc, device_category asc) as spend_quartile
+        ntile(4) over(partition by device_category order by total_revenue desc, orders_on_device desc, total_sessions desc, device_category asc) as spend_quartile
     from user_devices_ranked
     where rank_num = 1
 )
