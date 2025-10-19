@@ -55,13 +55,9 @@ models:
     - dbt_utils.expression_is_true:
         name: revenue_logical
         arguments:
-          expression: "total_reveue >= 0"
+          expression: "total_revenue >= 0"
           config:
             severity: warn
-    - mrt__user_device_segments_logical:
-        arguments:
-          config: 
-            severity: error 
 
   columns: 
     - name: user_id

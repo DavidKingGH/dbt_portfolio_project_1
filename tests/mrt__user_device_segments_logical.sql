@@ -1,6 +1,6 @@
 with base as (
 select *
-from {{ ref('mrt_user_device_segments') }}
+from {{ ref('mrt__user_device_segments') }}
 ),
 
 violations as (
