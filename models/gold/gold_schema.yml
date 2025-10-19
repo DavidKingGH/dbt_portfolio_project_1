@@ -31,6 +31,11 @@ models:
           config:
             severity: warn
 
+    - dbt_utils.expression_is_true:
+        name: months_since_acquisition_logical
+        arguments: 
+          expression: "(months_since_acquisition >= 0) or (months_since_acquisition is null)"
+
   columns: 
     - name: acquisition_device
       description: "Device type of user's first session"
@@ -41,18 +46,17 @@ models:
         - accepted_values: 
             arguments: 
               values: ['mobile', 'tablet', 'desktop']
+
     - name: acquisition_month
       description: "Month when user first appeared (YYYY-MM-01)"
       data_type: date
       constraints:
         - type: not_null
+
     - name: months_since_acquisition
       description: "Months elapsed since acquisition (0 = same month)"
       data_type: int
-      data_tests: 
-        - dbt_utils.expression_is_true:
-            arguments: 
-              expression: "months_since_acquisition >= 0 or months_since_acquisition is null"
+
     - name: total_revenue
       description: "Sum of revenue for this cohort-month combination"
       data_type: decimal
