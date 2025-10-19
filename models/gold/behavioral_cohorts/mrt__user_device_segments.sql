@@ -52,11 +52,11 @@ select
     dominant_device::varchar as dominant_device,
     total_revenue::decimal as total_revenue,
     spend_quartile::int as spend_quartile,
-    coalesce(total_sessions,0)::int as total_sessions 
-    dominant_device || ' - Q' || spend_quartile ||
+    coalesce(total_sessions,0)::int as total_sessions, 
+    (dominant_device || ' - Q' || spend_quartile ||
         case
             when spend_quartile = 1 THEN ' (Top Spenders)'
             when spend_quartile = 4 THEN ' (Low Spenders)'
             else ''
-        end as segment_name::varchar as segment_name
+        end)::varchar as segment_name
 from quartile_user_top_devices
