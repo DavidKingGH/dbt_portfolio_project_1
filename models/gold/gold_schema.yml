@@ -2,7 +2,7 @@ version: 2
 
 models:
 
-- name: mrt_acquisition_device_cohorts
+- name: mrt__acquisition_device_cohorts
   description: |
     "Calculates monthly user acquisition cohorts based on the device of their first session. It tracks monthly revenue, orders, 
     and purchaser counts for each cohort over time."
