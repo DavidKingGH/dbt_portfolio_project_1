@@ -74,4 +74,4 @@ final as (
   left join user_features_last_30d   w   on du.user_id = w.user_id
 )
 
-select * from final;
+select * from final

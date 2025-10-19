@@ -10,7 +10,7 @@ select
 	user_pseudo_id as user_uid,
 	event_ts as event_timestamp,
 	CAST(strptime(event_date,'%Y%m%d') AS date) as event_date,
-	item_id,
+	item_id::varchar as item_id,
 	item_name,
 	quantity,
 	price,

@@ -86,7 +86,7 @@ final as (
 
 select
     a.as_of_timestamp::date as as_of_date,
-    du.user_id,
+    du.user_id::varchar as user_id,
     case when pf.items_viewed > 0
          then (pf.items_carted::double) / pf.items_viewed
          else null 
@@ -94,10 +94,10 @@ select
     pf.abandoned_cart_value_last_30d::decimal as abandoned_cart_value_last_30d,
     pf.avg_price_of_items_carted_last_30d::decimal as avg_price_of_items_carted_last_30d,
     ic.last_carted_category_last_30d::varchar as last_carted_category_last_30d,
-    case when pf.item_category_viewed > 0
+    (case when pf.item_category_viewed > 0
          then (pf.items_viewed::double) / item_category_viewed 
          else null 
-    end as views_per_category_last_30d
+    end)::double as views_per_category_last_30d
 from {{ ref('dim_users') }} du
 cross join report_date a
 left join user_product_interest_features_last_30d pf on du.user_id = pf.user_id 

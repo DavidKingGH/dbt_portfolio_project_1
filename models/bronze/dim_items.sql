@@ -7,7 +7,7 @@ select * from {{ source('bronze', 'dim_items') }}
 renamed_and_casted as (
 SELECT
 
-    item_id,
+    item_id::varchar as item_id,
 	item_name,
 	item_brand,
 	item_variant,

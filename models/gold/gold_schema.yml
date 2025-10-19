@@ -16,6 +16,7 @@ models:
         - accepted_values: 
             arguments: 
               values: ['mobile', 'tablet', 'desktop']
+              
     - name: acquisition_month
       data_tests: 
         - not_null
@@ -750,6 +751,12 @@ models:
       description: "Count of sessions in 30-day window"
       data_type: integer
       constraints:
+        - type: not_null
+    
+    - name: unique_active_days_last_30d
+      description: "Count of distinct days user engaged with site"
+      data_type: int
+      constraints: 
         - type: not_null
     
     - name: avg_session_duration_last_30d_secs
