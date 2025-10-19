@@ -52,7 +52,7 @@ models:
       data_tests: 
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: "(months_since_acquisition >= 0) or (months_since_acquisition is null)"
+              expression: "months_since_acquisition >= 0 or months_since_acquisition is null"
     - name: total_revenue
       description: "Sum of revenue for this cohort-month combination"
       data_type: decimal
