@@ -46,7 +46,7 @@ models:
         - accepted_values: 
             arguments: 
               values: ['mobile', 'tablet', 'desktop']
-
+              
     - name: acquisition_month
       description: "Month when user first appeared (YYYY-MM-01)"
       data_type: date
@@ -54,9 +54,11 @@ models:
         - type: not_null
 
     - name: months_since_acquisition
-      description: "Months elapsed since acquisition (0 = same month)"
-      data_type: int
-
+      data_tests: 
+        - not_null
+        - dbt_utils.expression_is_true:
+            arguments: 
+              expression: ">= 0"
     - name: total_revenue
       description: "Sum of revenue for this cohort-month combination"
       data_type: decimal
@@ -89,36 +91,65 @@ models:
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
     to other users on the same device type."
+  config:
+    tags: ['gold', 'behavioral_cohorts']
+    contract: 
+      enforced: true
+  data_tests:
+    - dbt_utils.expression_is_true:
+        name: revenue_logical
+        arguments:
+          expression: "total_revenue >= 0"
+          config:
+            severity: warn
+
   columns: 
     - name: user_id
-      data_tests: 
-        - not_null
-        - unique
+      description: 'purchaser id'
+      data_type: varchar
+      constraints: 
+        - type: not_null
+        - type: unique
+      data_tests:
         - relationships:
             arguments:
-              to: ref('stg__user_orders')
+              to: ref('dim_users')
               field: user_id
     - name: dominant_device
-      data_tests: 
-        - not_null
+      description: 'device with most orders; ties broken by revenue, sessions, then alphabetical'
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests:
         - accepted_values: 
             arguments: 
               values: ['mobile', 'tablet', 'desktop']
     - name: total_revenue
+      description: 'lifetime revenue on dominant device'
+      data_type: decimal
+      constraints:
+        - type: not_null
+    - name: spend_quartile
+      description: 'spend quartile within dominant_device (1 = top spenders, 4 = low spenders)'
+      data_type: int
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
-        - dbt_utils.expression_is_true:
-            arguments:
-              expression: ">=0"
-    - name: cart_value_quartile
-      data_tests:
-        - not_null
         - accepted_values: 
             arguments: 
               values: [1,2,3,4]
+    - name: total_sessions
+      description: 'total sessons across device category' 
+      data_type: int
+      constraints: 
+        - type: not_null
+
     - name: segment_name
-      data_tests:
-        - not_null
+      description: "human-readable label: '<device> - Q<quartile> (+ top/low badges)"
+      data_type: varchar
+      constraints:
+        - type: not_null
+
 - name: mrt__campaign_performance_rev_metrics
   description: |
     "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
@@ -177,9 +208,10 @@ models:
               severity: warn
     - dbt_utils.expression_is_true:
         name: customers_imply_revenue
-        expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
-        config:
-          severity: warn
+        arguments:
+          expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
+          config:
+            severity: warn
   columns:
     - name: session_source
       data_tests:
@@ -217,16 +249,18 @@ models:
   data_tests:
     - dbt_utils.expression_is_true:
         name: funnel_logic_valid
-        expression: |
-          sessions_with_view_item >= sessions_with_add_to_cart
-          AND sessions_with_add_to_cart >= sessions_with_begin_checkout
-          AND sessions_with_begin_checkout >= sessions_with_add_shipping
-          AND sessions_with_add_shipping >= sessions_with_add_payment
-          AND sessions_with_add_payment >= sessions_with_purchase
-          AND sessions_with_purchase >= 0
+        arguments:
+          expression: |
+            sessions_with_view_item >= sessions_with_add_to_cart
+            AND sessions_with_add_to_cart >= sessions_with_begin_checkout
+            AND sessions_with_begin_checkout >= sessions_with_add_shipping
+            AND sessions_with_add_shipping >= sessions_with_add_payment
+            AND sessions_with_add_payment >= sessions_with_purchase
+            AND sessions_with_purchase >= 0
     - dbt_utils.expression_is_true:
         name: has_data
-        expression: "sessions_with_view_item > 0"
+        arguments:
+          expression: "sessions_with_view_item > 0"
   
   columns:
     - name: sessions_with_view_item
@@ -402,10 +436,18 @@ models:
           expression: "frequency >= 0 AND monetary >= 0 AND recency >= 0"
     - dbt_utils.expression_is_true:
         name: recency_matches_calculation
-        expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
-        config:
-          severity: warn
-  
+        arguments:
+          expression: "recency = date_diff('day', max_purchase_date, as_of_date)"
+          config:
+            severity: warn
+
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
+
   columns:
   - name: user_id
     description: "Primary key - one row per customer."
@@ -456,9 +498,10 @@ models:
           combination_of_columns: ['user_id','as_of_date']
     - dbt_utils.expression_is_true:
         name: all_customers_segmented
-        expression: "rfm_segment != 'other'"
-        config:
-          severity: warn  # Warn if some fall into 'other' 
+        arguments:
+          expression: "rfm_segment != 'other'"
+          config:
+            severity: warn  # Warn if some fall into 'other' 
   columns:
   - name: user_id
     description: "Primary key - one row per customer."
@@ -522,4 +565,262 @@ models:
     data_type: varchar
     constraints: 
       - type: not_null
+- name: mrt__funnel_steps_last_30d
+  description: "30-day rolling window KPIs: conversion rates and funnel metrics"
+  config:
+    tags: ['gold', 'predictive_features', 'kpi_dashboard']
+    contract:
+      enforced: true
+  
+  data_tests: 
+    - dbt_utils.expression_is_true: 
+        name: valid_browse_to_buy_rates
+        arguments: 
+          expression: |
+            (browse_to_buy_overall IS NULL OR (browse_to_buy_overall >= 0 AND browse_to_buy_overall <= 1))
+            AND (browse_to_buy_new IS NULL OR (browse_to_buy_new >= 0 AND browse_to_buy_new <= 1))
+            AND (browse_to_buy_returning IS NULL OR (browse_to_buy_returning >= 0 AND browse_to_buy_returning <= 1))
+  
+    - dbt_utils.expression_is_true: 
+        name: high_intent_users_nonnegative
+        arguments: 
+          expression: "high_intent_users_overall >= 0"
+
+
+    - dbt_utils.expression_is_true: 
+        name: valid_dropoff_rate
+        arguments:
+          expression: "dropoff_rate_at_shipping IS NULL OR (dropoff_rate_at_shipping >= 0 AND dropoff_rate_at_shipping <= 1)"
+ 
+    - dbt_utils.expression_is_true:
+        name: valid_funnel_rates
+        arguments:
+          expression: |
+            (rate_cart_to_checkout IS NULL OR (rate_cart_to_checkout >= 0 AND rate_cart_to_checkout <= 1))
+            AND (rate_checkout_to_shipping IS NULL OR (rate_checkout_to_shipping >= 0 AND rate_checkout_to_shipping <= 1))
+            AND (rate_shipping_to_payment IS NULL OR (rate_shipping_to_payment >= 0 AND rate_shipping_to_payment <= 1))
     
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
+
+  columns:
+    - name: as_of_date
+      description: "End date of 30-day window (max event_date)"
+      data_type: date
+      constraints:
+        - type: not_null
+
+    - name: browse_to_buy_overall
+      description: "Conversion rate: purchasers / browsers (all users)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    
+    - name: browse_to_buy_new
+      description: "Conversion rate for new users (first seen in 30-day window)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    
+    - name: browse_to_buy_returning
+      description: "Conversion rate for returning users (first seen before window)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: high_intent_users_overall
+      description: "Count of users who began checkout"
+      data_type: integer
+      constraints: 
+        - type: not_null
+    
+    - name: rate_cart_to_checkout
+      description: "Conversion rate: users who started checkout / users who added to cart"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: rate_checkout_to_shipping
+      description: "Conversion rate: users who added shipping / users who started checkout"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+      
+    - name: rate_shipping_to_payment
+      description: "Conversion rate: users who added payment / users who added shipping"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+
+    - name: dropoff_rate_at_shipping
+      description: "Abandonment rate: users who didn't add payment after adding shipping"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+- name: mrt__item_interactions_last_30d
+  description: '...'
+  config:
+    tags: ['gold', 'predictive_features', 'kpi_dashboard']
+    contract:
+      enforced: true
+  data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments: 
+          combination_of_columns: ['user_id','as_of_date']
+    - dbt_utils.expression_is_true:
+        name: valid_cart_to_view_ratio
+        arguments: 
+          expression: "(cart_to_view_ratio_last_30d is null or cart_to_view_ratio_last_30d >= 0)"
+          config:
+            severity: warn
+    - dbt_utils.expression_is_true:
+        name: abandoned_cart_nonnegative
+        arguments: 
+          expression: "abandoned_cart_value_last_30d >= 0"
+    - dbt_utils.expression_is_true:
+        name: valid_avg_price_carted_items
+        arguments: 
+          expression: "avg_price_of_items_carted_last_30d >= 0"
+    - dbt_utils.expression_is_true:
+        name: views_per_category_last_30d_logical
+        arguments:
+          expression: "views_per_category_last_30d is null or  views_per_category_last_30d >= 0"
+          config:
+            severity: warn  
+
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
+
+  columns: 
+    - name: as_of_date
+      description: "End date of 30-day window (max event_date)"
+      data_type: date
+      constraints: 
+        - type: not_null
+
+    - name: user_id
+      description: '...'
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests: 
+        - relationships: 
+            arguments: 
+              to: ref('dim_users')
+              field: user_id
+    - name: cart_to_view_ratio_last_30d
+      description: "Ratio of items carted to items viewed (0-1)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+    - name: abandoned_cart_value_last_30d
+      description: "Total value of items added to cart but not purchased"
+      data_type: decimal
+      # CAN BE NULL if no browsers in window
+
+    - name: avg_price_of_items_carted_last_30d
+      description: "Average price of items added to cart"
+      data_type: decimal
+      # CAN BE NULL if no browsers in window
+    - name: last_carted_category_last_30d
+      description: "Most recent product category added to cart"
+      data_type: varchar
+      # CAN BE NULL if no browsers in window
+    - name: views_per_category_last_30d
+      description: "Average items viewed per category (>1 = specialist, <1 = browser)"
+      data_type: double
+      # CAN BE NULL if no browsers in window
+- name: mrt__engagement_intensity_last_30d
+  description: '...'
+  config:
+    tags: ['gold', 'kpi_dashboard', 'predictive_features']
+    contract: 
+      enforced: true
+
+  data_tests:
+    - dbt_utils.unique_combination_of_columns: 
+        name: confirm_grain
+        arguments: 
+          combination_of_columns: ['as_of_date', 'user_id']
+
+    - dbt_utils.expression_is_true:
+        name: recency_logical
+        arguments:
+          expression: "days_since_last_session >= 0 OR days_since_last_session IS NULL" 
+          config:
+            severity: warn
+      
+    - dbt_utils.expression_is_true:
+        name: snapshot_date_reasonable
+        arguments:
+          expression: "as_of_date <= CURRENT_DATE"
+          config:
+            severity: warn
+
+    - dbt_utils.expression_is_true:
+        name: events_per_session_logical
+        arguments:
+          expression: |
+            user_sessions_last_30d IS NULL 
+            OR event_count_last_30d IS NULL
+            OR event_count_last_30d >= user_sessions_last_30d
+          config:
+            severity: warn
+  
+  columns:
+    - name: as_of_date
+      description: "End date of 30-day window"
+      data_type: date
+      constraints: 
+        - type: not_null
+    
+    - name: user_id
+      description: "User identifier"
+      data_type: varchar
+      constraints:
+        - type: not_null
+      data_tests: 
+        - relationships:
+            arguments: 
+              to: ref('dim_users')
+              field: user_id
+    
+    - name: days_since_last_session
+      description: "Days between last session and snapshot date"
+      data_type: integer
+    
+    - name: user_sessions_last_30d
+      description: "Count of sessions in 30-day window"
+      data_type: integer
+      constraints:
+        - type: not_null
+    
+    - name: unique_active_days_last_30d
+      description: "Count of distinct days user engaged with site"
+      data_type: int
+      constraints: 
+        - type: not_null
+    
+    - name: avg_session_duration_last_30d_secs
+      description: "Average session duration in seconds"
+      data_type: double
+      constraints:
+        - type: not_null    
+
+    - name: median_inter_session_gap_hours
+      description: "Median time between sessions (hours)"
+      data_type: double  
+      # Can be NULL if user has only 1 session
+    
+    - name: event_count_last_30d
+      description: "Total events in 30-day window"
+      data_type: integer
+      constraints:
+        - type: not_null
+
+    - name: avg_events_per_session_last_30d
+      description: "Average events per session"
+      data_type: double
+      # Can be NULL if user had 0 sessions in last 30d
+
+  

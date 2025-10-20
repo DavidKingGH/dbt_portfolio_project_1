@@ -1,0 +1,42 @@
+﻿----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\bronze\dim_items.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\bronze\dim_users.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\bronze\fct_events.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\bronze\fct_event_items.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\behavioral_cohorts\mrt__acquisition_device_cohorts.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\behavioral_cohorts\mrt__user_device_segments.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\campaign_performance\mrt__campaign_performance_rev_metrics.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\campaign_performance\mrt__first_touch_ltv.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\conversion_funnel\mrt__conversion_funnel.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\marketing_attribution\mrt__first_touch_attribution.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\marketing_attribution\mrt__last_touch_attribution.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\predictive_features\mrt__funnel_steps_last_30d.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\predictive_features\mrt__item_interactions_last_30d.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\rfm_segmentation\mrt__rfm.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\gold\rfm_segmentation\mrt__rfm_scoring.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\int\int__acquisition_touchpoints.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\int\int__customer_revenue.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\int\int__purchase_touchpoints.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\stg\stg__conversion_events.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\stg\stg__user_orders.sql -----
+
+----- C:\Users\David\Downloads\Coding_Projects\dbt\portfolio\portfolio_project_1\models\silver\stg\stg__user_sessions.sql -----
+

@@ -20,7 +20,7 @@ order_items as (
     min(pe.user_id) as user_id,
     min(pe.ga_session_id)  as ga_session_id,
     min(pe.device_category) as device_category,
-    coalesce(min(i.item_revenue_in_usd),0) as revenue,
+    coalesce(sum(i.item_revenue_in_usd),0) as revenue,
     sum(coalesce(i.quantity,1)) as total_items,
     count(distinct i.item_id) as distinct_products
   from purchase_events pe
