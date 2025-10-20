@@ -1,32 +1,57 @@
-WITH sessions_with_revenue AS (
-    SELECT
-        s.ga_session_id,
-        s.user_id,
-        -- Handle missing/placeholder values
-        COALESCE(NULLIF(TRIM(s.session_source), ''), '(not set)') AS session_source,
-        COALESCE(NULLIF(TRIM(s.session_medium), ''), '(not set)') AS session_medium,
-        c.purchase_revenue
-    FROM
-        {{ ref('stg__user_sessions') }} AS s
-    LEFT JOIN
-        {{ ref('stg__conversion_events') }} AS c
-        ON s.ga_session_id = c.ga_session_id
+with user_sessions as (
+    select
+        ga_session_id,
+        user_id,
+        -- handle missing/placeholder values
+        lower(coalesce(nullif(trim(s.session_source), ''), '(not set)')) as session_source,
+        lower(coalesce(nullif(trim(s.session_medium), ''), '(not set)')) as session_medium
+    from
+        {{ ref('stg__user_sessions') }} as s
+),
+
+orders as (
+  -- one row per order. requires an order identifier; adapt column names accordingly.
+  select
+      ga_session_id,
+      purchase_id,
+      sum(purchase_revenue) as purchase_revenue
+  from {{ ref('stg__conversion_events') }}
+  group by ga_session_id, purchase_id
+),
+
+session_revenue as (
+  select
+      ga_session_id,
+      sum(purchase_revenue) as session_revenue,
+      count(*) as order_count
+  from orders
+  group by ga_session_id
+),
+
+joined as (
+  select
+      s.user_id,
+      s.session_source,
+      s.session_medium,
+      coalesce(sr.session_revenue, 0) as session_revenue,
+      coalesce(sr.order_count, 0)     as order_count
+  from user_sessions s
+  left join session_revenue sr using (ga_session_id)
 )
 
--- Aggregate to the channel level
-SELECT
-    session_source,
-    session_medium,
-    COALESCE(SUM(purchase_revenue), 0) AS total_revenue,
-    COUNT(DISTINCT user_id) AS total_users,
-    COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN user_id END) AS converting_users,
-    CASE 
-        WHEN COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN ga_session_id END) > 0 
-        THEN SUM(purchase_revenue) / COUNT(DISTINCT CASE WHEN purchase_revenue IS NOT NULL THEN ga_session_id END)
-        ELSE 0 
-    END AS average_order_value
-FROM
-    sessions_with_revenue
-GROUP BY
+-- aggregate to the channel level
+select
+    session_source::varchar as session_source,
+    session_medium::varchar as session_medium,
+    coalesce(sum(session_revenue), 0)::decimal as total_revenue,
+    count(distinct user_id)::int as total_users,
+    count(distinct case when session_revenue > 0 then user_id end)::int as converting_users,
+    (case when sum(order_count) > 0 
+          then sum(session_revenue) / nullif(sum(order_count),0)
+          else 0 
+    end)::decimal as average_order_value
+from
+    joined
+group by
     session_source,
     session_medium
