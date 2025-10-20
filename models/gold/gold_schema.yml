@@ -66,7 +66,6 @@ models:
         - dbt_utils.expression_is_true:
             arguments: 
               expression: ">= 0"  
-              expression: ">= 0"  
     - name: orders
       description: "Count of orders for this cohort-month combination"
       data_type: int
@@ -76,7 +75,6 @@ models:
         - dbt_utils.expression_is_true:
             arguments: 
               expression: ">= 0"  
-              expression: ">= 0"  
     - name: purchasers
       description: "Count of unique users who purchased in this cohort-month"
       data_type: int
@@ -85,8 +83,6 @@ models:
       data_tests:
         - dbt_utils.expression_is_true:
             arguments: 
-              expression: ">= 0"  
-
               expression: ">= 0"  
 
 - name: mrt__user_device_segments
