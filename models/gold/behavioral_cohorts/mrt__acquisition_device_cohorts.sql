@@ -1,6 +1,6 @@
 with
 
-sessions as (
+user_sessions as (
 
 select
     user_id,
@@ -18,7 +18,7 @@ select
     session_start_timestamp, 
     device_category,
     row_number() over(partition by user_id order by session_start_timestamp asc) as session_rank
-from sessions
+from user_sessions
 ),
 
 acquisition_cohorts as (
@@ -42,18 +42,19 @@ select
 from acquisition_cohorts ac
 left join {{ ref('stg__user_orders') }} uo 
     on ac.user_id =  uo.user_id
-    where uo.order_date is not null
+    and uo.order_date is not null
+    and uo.order_date >= ac.acquisition_month
 ),
 
 final as (
 
 select 
-     acquisition_device,
-     acquisition_month,
-     date_diff('month', acquisition_month, order_month) as months_since_acquisition,
-     sum(revenue) as total_revenue, 
-     count(*) as orders,
-     count(distinct user_id) as purchasers
+     acquisition_device::varchar as acquisition_device,
+     acquisition_month::date as acquisition_month,
+     date_diff('month', acquisition_month, order_month)::int as months_since_acquisition,
+     sum(coalesce(revenue,0))::decimal as total_revenue, 
+     count(case when revenue is not null then 1 end)::int as orders,
+     count(distinct case when revenue is not null then user_id end)::int as purchasers
 from cohorts_user_orders
 group by 1,2,3
 )
