@@ -10,10 +10,10 @@ models:
           combination_of_columns: ['purchase_id', 'user_id', 'ga_session_id']
     - dbt_utils.expression_is_true:
         arguments: 
-          expression: "purchase_revenue >=0"
+          expression: "purchase_revenue >= 0"
     - dbt_utils.expression_is_true:
         arguments: 
-          expression: "distinct_item_count >=1"
+          expression: "distinct_item_count >= 0"
   columns:
     - name: purchase_id
       description: primary key

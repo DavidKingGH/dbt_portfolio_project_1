@@ -15,19 +15,17 @@ select
     sum(coalesce(item_revenue_in_usd,0)) as revenue,
     count(distinct item_id) as distinct_item_count
 from purchases p
-left join {{ ref('fct_event_items') }} fei
-  on fei.event_id = p.event_id
-group by 1
+left join {{ ref('fct_event_items') }} fei using(event_id)
 group by event_id
-),
+)
 
 select 
     p.event_id as purchase_id, 
     p.user_id,
     p.ga_session_id,
     p.event_timestamp as purchase_timestamp,
-    coalesce(ir.revenue, 0) as purchase_revenue,
-    coalesce(ir.distinct_item_count,0) as distinct_item_count
+    coalesce(pr.revenue, 0) as purchase_revenue,
+    coalesce(pr.distinct_item_count,1) as distinct_item_count
 from purchases p
-left join item_rev ir
-  on ir.event_id = p.event_id
+left join purchase_revenue pr
+  on pr.event_id = p.event_id

@@ -3,7 +3,7 @@ SELECT
     user_id,
     lower(nullif(trim(session_source), '')) as session_source,
     lower(nullif(trim(session_medium), '')) as session_medium,
-    session_id,
+    ga_session_id,
     session_start_timestamp
 FROM
     {{ ref('stg__user_sessions') }}
@@ -14,9 +14,9 @@ normalized as (
     user_id,
     coalesce(session_source, '(not set)') as session_source_norm,
     coalesce(session_medium, '(not set)') as session_medium_norm,
-    session_id,
+    ga_session_id,
     session_start_timestamp
-  from sessions
+  from user_sessions
 ),
 
 ranked as (
@@ -24,14 +24,14 @@ ranked as (
     *,
     row_number() over (
       partition by user_id
-      order by session_start_timestamp asc, session_id asc
+      order by session_start_timestamp asc, ga_session_id asc
     ) as rn_any,
     row_number() over (
       partition by user_id
       order by
         case when session_medium_norm in ('(not set)','(none)','direct') then 1 else 0 end,
         session_start_timestamp asc,
-        session_id asc
+        ga_session_id asc
     ) as rn_non_direct_first
   from normalized
 )
