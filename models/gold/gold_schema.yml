@@ -238,13 +238,20 @@ models:
             arguments:
               expression: ">=0"
 - name: mrt__conversion_funnel
-  description:  Aggregate conversion funnel showing session drop-off at each purchase step
-  
+  description:  "Aggregate conversion funnel showing session drop-off at each purchase step"  
   config:
+    tags: ['gold', 'conversion_funnel']
     contract:
       enforced: true
-  
+
   data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns: 
+            - as_of_date
+            - source
+            - medium
+
     - dbt_utils.expression_is_true:
         name: funnel_logic_valid
         arguments:
@@ -255,12 +262,25 @@ models:
             AND sessions_with_add_shipping >= sessions_with_add_payment
             AND sessions_with_add_payment >= sessions_with_purchase
             AND sessions_with_purchase >= 0
+
     - dbt_utils.expression_is_true:
         name: has_data
         arguments:
           expression: "sessions_with_view_item > 0"
   
   columns:
+    - name: as_of_date
+      data_type: date
+      constraints:
+        - type: not_null
+    - name: source
+      data_type: varchar
+      constraints:
+        - type: not_null
+    - name: medium
+      data_type: varchar
+      constraints:
+        - type: not_null
     - name: sessions_with_view_item
       data_type: integer
       constraints:
@@ -285,6 +305,7 @@ models:
       data_type: integer
       constraints:
         - type: not_null
+
 - name: mrt__first_touch_attribution
   description: first-touch attribution per purchase 
   config:
@@ -360,7 +381,7 @@ models:
     - dbt_utils.expression_is_true:
         name: purchase_after_last_touch
         arguments:
-          expression: "purchase_timestamp >= touchpoint_timestamp "
+          expression: "purchase_timestamp >= touchpoint_timestamp"
     - dbt_utils.unique_combination_of_columns: 
         name: confirm_grain
         arguments: 
