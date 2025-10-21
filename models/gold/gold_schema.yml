@@ -291,13 +291,20 @@ models:
             arguments:
               expression: ">=0"
 - name: mrt__conversion_funnel
-  description:  Aggregate conversion funnel showing session drop-off at each purchase step
-  
+  description:  "Aggregate conversion funnel showing session drop-off at each purchase step"  
   config:
+    tags: ['gold', 'conversion_funnel']
     contract:
       enforced: true
-  
+
   data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns: 
+            - as_of_date
+            - source
+            - medium
+
     - dbt_utils.expression_is_true:
         name: funnel_logic_valid
         arguments:
@@ -308,36 +315,59 @@ models:
             AND sessions_with_add_shipping >= sessions_with_add_payment
             AND sessions_with_add_payment >= sessions_with_purchase
             AND sessions_with_purchase >= 0
+
     - dbt_utils.expression_is_true:
         name: has_data
         arguments:
           expression: "sessions_with_view_item > 0"
   
   columns:
+    - name: as_of_date
+      description: "Analysis cutoff date (max date in dataset)"
+      data_type: date
+      constraints:
+        - type: not_null
+    - name: source
+      description: "Normalized marketing traffic source (e.g., google, facebook, (direct)) derived from event session metadata."
+      data_type: varchar
+      constraints:
+        - type: not_null
+    - name: medium
+      description: "Normalized marketing traffic medium (e.g., cpc, email, referral, (none)), paired with source for attribution granularity."
+      data_type: varchar
+      constraints:
+        - type: not_null
     - name: sessions_with_view_item
+      description: "Count of distinct sessions in the lookback window that included at least one view_item event. Represents the total population entering the funnel."
       data_type: integer
       constraints:
         - type: not_null
     - name: sessions_with_add_to_cart
+      description: "Count of distinct sessions that included both a view_item and add_to_cart event. Indicates how many sessions progressed from browsing to product engagement."
       data_type: integer
       constraints:
         - type: not_null
     - name: sessions_with_begin_checkout
+      description: "Count of distinct sessions that reached the begin_checkout step after adding to cart. Measures transition from intent to checkout initiation."
       data_type: integer
       constraints:
         - type: not_null
     - name: sessions_with_add_shipping
+      description: "Count of sessions that completed add_shipping_info, showing progression through checkout form completion."
       data_type: integer
       constraints:
         - type: not_null
     - name: sessions_with_add_payment
+      description: "Count of sessions that reached add_payment_info. Represents users providing payment details or equivalent step before purchase."
       data_type: integer
       constraints:
         - type: not_null
     - name: sessions_with_purchase
+      description: "Count of sessions that completed a purchase event (while also meeting prior funnel conditions, depending on model rules). Serves as the final conversion metric."
       data_type: integer
       constraints:
         - type: not_null
+
 - name: mrt__first_touch_attribution
   description: first-touch attribution per purchase 
   config:
@@ -412,7 +442,7 @@ models:
     - dbt_utils.expression_is_true:
         name: purchase_after_last_touch
         arguments:
-          expression: "purchase_timestamp >= touchpoint_timestamp "
+          expression: "purchase_timestamp >= touchpoint_timestamp"
     - dbt_utils.unique_combination_of_columns: 
         name: confirm_grain
         arguments: 
