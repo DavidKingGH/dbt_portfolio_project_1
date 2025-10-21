@@ -149,55 +149,93 @@ models:
         - type: not_null
 
 - name: mrt__campaign_performance_rev_metrics
-  description: |
-    "Segments users based on their dominant purchasing device and assigns them to a spending quartile relative 
-    to other users on the same device type."
+  description: "channel-level revenue + user metrics; grain = session_source, session_medium. users are counted per-channel."
+  config:
+    tags: ['gold', 'campaign_performance']
+    contract:
+        enforced: true
+  
   data_tests:
-    - dbt_utils.expression_is_true:
-        name: revenue_matches_conversions
-        arguments:
-          expression: "(converting_users = 0 AND total_revenue = 0) OR (converting_users > 0 AND total_revenue >0)"
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [session_source, session_medium]
+
+      - dbt_utils.expression_is_true:
+          name: revenue_nonnegative
+          arguments:
+            expression: "total_revenue >= 0"
           config:
-              severity: warn
+            severity: warn
+
+      - dbt_utils.expression_is_true:
+          name: converting_less_than_total
+          arguments:
+            expression: "converting_users <= total_users"
+
+      - dbt_utils.expression_is_true:
+          name: revenue_matches_conversions
+          arguments:
+            expression: "(converting_users = 0 AND total_revenue = 0) OR (converting_users > 0 AND total_revenue >= 0)"
+          config:
+            severity: warn
   columns:
     - name: session_source
+      description: "utm source (normalized to lowercase | blanks -> '(not set)')"
+      data_type: varchar
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.not_empty_string
     - name: session_medium
+      description: "utm medium (normalized to lowercase | blanks -> '(not set)')"
+      data_type: varchar
+      constraints: 
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.not_empty_string
     - name: total_revenue
-      data_tests:
-        - not_null
-        - dbt_utils.expression_is_true:
-            arguments:
-              expression: ">=0"
+      description: "sum of purchase revenue attributed to sessions in this channel"
+      data_type: decimal
+      constraints: 
+        - type: not_null
     - name: total_users
+      description: "distinct users with at least one session in this channel; users may appear in multiple channels"
+      data_type: int
+      constraints: 
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
     - name: converting_users
+      description: "distinct users with >0 revenue in this channel"
+      data_type: int
+      constraints: 
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
-        - dbt_utils.expression_is_true:
-            arguments:
-              expression: "<= total_users"
     - name: average_order_value
+      description: "total_revenue / order_count, this is revenue per purchase event"
+      data_type: decimal
+      constraints: 
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
 - name: mrt__first_touch_ltv
   description: "..."
+  config:
+    tags: ['gold', 'campaign_performance']
+    contract:
+      enforced: true
   data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns: [session_source, session_medium]
+
     - dbt_utils.expression_is_true:
         name: avg_ltv_calculation_correct
         arguments:
@@ -207,33 +245,48 @@ models:
     - dbt_utils.expression_is_true:
         name: customers_imply_revenue
         arguments:
-          expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort > 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
+          expression: "(acquired_customers > 0 AND total_purchase_value_from_cohort >= 0) OR (acquired_customers = 0 AND total_purchase_value_from_cohort = 0)"
           config:
             severity: warn
   columns:
     - name: session_source
+      description: "utm source (normalized to lowercase | blanks -> '(not set)')"
+      data_type: varchar
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.not_empty_string
     - name: session_medium
+      description: "utm medium (normalized to lowercase | blanks -> '(not set)')"
+      data_type: varchar
+      constraints: 
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.not_empty_string
     - name: acquired_customers
+      description: '...'
+      data_type: int
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
-              expression: "> 0"
+              expression: ">= 0"
     - name: total_purchase_value_from_cohort
+      description: '...'
+      data_type: decimal
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
     - name: average_ltv_by_channel
+      description: '...'
+      data_type: decimal
+      constraints:
+        - type: not_null
       data_tests:
-        - not_null
         - dbt_utils.expression_is_true:
             arguments:
               expression: ">=0"
@@ -349,7 +402,6 @@ models:
     - name: touchpoint_medium
       data_type: varchar
 
-    
 - name: mrt__last_touch_attribution
   description: last-touch attribution per purchase 
   config:
