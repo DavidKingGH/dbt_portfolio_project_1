@@ -17,7 +17,6 @@ jobs:
 
     steps:
       # Step 1: Check out your repository code
-      # This will now include your packages.yml file
       - name: Check out repository code
         uses: actions/checkout@v4
 

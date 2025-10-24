@@ -54,7 +54,7 @@ jobs:
       # -----------------
       # THE CRITICAL STEP
       # -----------------
-      # This runs dbt against your PRODUCTION environment.
+
       - name: Run dbt build for Production
         run: dbt build --target prod
       
