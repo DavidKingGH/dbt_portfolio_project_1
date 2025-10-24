@@ -7,6 +7,10 @@ This project implements a modern analytics pipeline for GA4 e-commerce event dat
 Data is extracted via **PySpark**, modeled and tested in **dbt**, and continuously integrated and deployed through **GitHub Actions**.  
 Final marts are stored in **MotherDuck** and visualized in **Power BI**, demonstrating full data lifecycle coverage — from raw ingestion to BI-ready gold layers.
 
+![CI](https://github.com/DavidKingGH/dbt_portfolio_project_1/actions/workflows/ci.yml/badge.svg)
+![CD](https://github.com/DavidKingGH/dbt_portfolio_project_1/actions/workflows/cd.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 ---
 
 ## ⚙️ Architecture
@@ -110,6 +114,18 @@ A sample visualization (`purchase_revenue` by `touchpoint_medium` and `touchpoin
 ## 🚀 How to Run Locally
 
 > ⚠️ Prerequisite: This ETL assumes access to the GA4 sample dataset from BigQuery (`bigquery-public-data.ga4_obfuscated_sample_ecommerce`) and a configured local or remote GCS bucket for staging Parquet outputs.
+
+
+## 📄 License 
+
+This repository’s codebase (including dbt models, PySpark ETL scripts, and CI/CD configuration) is released under the MIT License
+
+[MIT](LICENSE)
+
+Note:
+The underlying dataset used in this project is derived from the publicly available Google Analytics 4 (GA4) Demo Ecommerce dataset hosted by Google.
+All trademarks and data remain the property of Google LLC.
+This repository is for educational and demonstration purposes only and does not distribute or claim ownership over any Google data.
 
 ### 1️⃣ Configure Environment
 Set up your local `.env` or environment variables with the following keys:
