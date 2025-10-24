@@ -103,7 +103,7 @@ A sample visualization (`purchase_revenue` by `touchpoint_medium` and `touchpoin
 - dbt gold models are BI-ready  
 - data lineage holds end-to-end from PySpark extraction through Power BI consumption  
 
-![Power BI Visualization of dbt Gold Models](assets/powerbi_visual.png)
+![Power BI Visualization of dbt Gold Models](./assets/powerbi_visual.png)
 <p align="center"><em>Example Power BI chart pulling purchase_revenue by source/medium from dbt gold marts.</em></p>
 ---
 
