@@ -1,5 +1,7 @@
 # GA4 E-Commerce Analytics — End-to-End PySpark + dbt + CI/CD Pipeline
 
+**A modern data stack project demonstrating full pipeline ownership** — from raw GA4 event ingestion (PySpark) to BI-ready marts (dbt + MotherDuck), automated with GitHub Actions and visualized in Power BI.
+
 ## 🧠 Overview
 This project implements a modern analytics pipeline for GA4 e-commerce event data.  
 Data is extracted via **PySpark**, modeled and tested in **dbt**, and continuously integrated and deployed through **GitHub Actions**.  
