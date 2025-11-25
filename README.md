@@ -151,8 +151,11 @@ dbt build
 dbt test
 dbt docs generate && dbt docs serve
 
-
+```
 ## 🚀 Future Roadmap & Enhancements
+
+| Model | Theme | Description |
+|--------|--------|-------------|
 | `mrt__multi_touch_pathing` | Attribution Pathing | Maps multi-touch journeys (source sequences) leading to purchase for advanced attribution modeling. |
 | `mrt__purchase_summary_daily` | Revenue Summary | Daily revenue and purchase metrics rolled up by date, channel, and device; used for time-series visualizations. |
 | `mrt__marketing_channel_efficiency` | ROI Metrics | Combines spend and attributed revenue to compute ROAS, CPA, and efficiency KPIs by channel. |
