@@ -66,10 +66,9 @@ Each enforces **dbt contracts**, **column-level constraints**, and **data integr
 | `mrt__acquisition_device_cohorts` | Behavioral Cohorts | Groups users by device type and acquisition month to track engagement, retention, and spend trends. |
 | `mrt__user_device_segments` | Behavioral Segmentation | Classifies users into device and spend quartiles for downstream personalization analysis. |
 | `mrt__rfm` | Customer Value | Assigns recency, frequency, and monetary scores to users; supports customer segmentation and lifecycle modeling. |
-| `mrt__multi_touch_pathing` | Attribution Pathing | Maps multi-touch journeys (source sequences) leading to purchase for advanced attribution modeling. |
-| `mrt__purchase_summary_daily` | Revenue Summary | Daily revenue and purchase metrics rolled up by date, channel, and device; used for time-series visualizations. |
-| `mrt__marketing_channel_efficiency` | ROI Metrics | Combines spend and attributed revenue to compute ROAS, CPA, and efficiency KPIs by channel. |
-
+| `mrt_engagement_intensity_last_30d` |	Predictive Features |	Computes rolling 30-day engagement metrics per user (e.g., inter-session gaps, active days, session duration) to support churn prediction and propensity modeling. |
+| `mrt__funnel_steps_last_30d` |	Funnel Health |	Monitoring dashboard for rolling 30-day conversion rates across checkout steps (Cart → Shipping → Payment), segmented by new vs. returning users. |
+| `mrt__item_interactions_last_30d` |	Product Interest |	Aggregates user-level product behaviors over 30 days, capturing high-value signals like abandoned cart value, price sensitivity, and category affinity. |
 ---
 
 ## 🔄 CI/CD Automation
@@ -153,3 +152,7 @@ dbt test
 dbt docs generate && dbt docs serve
 
 
+## 🚀 Future Roadmap & Enhancements
+| `mrt__multi_touch_pathing` | Attribution Pathing | Maps multi-touch journeys (source sequences) leading to purchase for advanced attribution modeling. |
+| `mrt__purchase_summary_daily` | Revenue Summary | Daily revenue and purchase metrics rolled up by date, channel, and device; used for time-series visualizations. |
+| `mrt__marketing_channel_efficiency` | ROI Metrics | Combines spend and attributed revenue to compute ROAS, CPA, and efficiency KPIs by channel. |
